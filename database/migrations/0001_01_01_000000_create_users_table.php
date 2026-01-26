@@ -17,13 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-<<<<<<< HEAD
-=======
 
             // ROLE: admin / user
             $table->enum('role', ['admin', 'user'])->default('user');
 
->>>>>>> e82c9977d329d16e1587d9f82aa8c0011d443111
             $table->rememberToken();
             $table->timestamps();
         });
