@@ -12,9 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Menambah kolom role, defaultnya 'user'
-            // after('password') gunanya biar urutan di database rapi setelah kolom password
-            $table->string('role')->default('user')->after('password');
+            $table->enum('status', ['active', 'banned', 'suspended'])->default('active')->after('role');
         });
     }
 
@@ -24,8 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Menghapus kolom role jika migrasi dibatalkan
-            $table->dropColumn('role');
+            $table->dropColumn('status');
         });
     }
 };

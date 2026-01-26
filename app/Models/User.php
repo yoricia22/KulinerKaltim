@@ -22,7 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'is_banned',
+        'status',
     ];
 
     public function activityLogs()

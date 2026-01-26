@@ -1,82 +1,105 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Sireta</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 font-sans">
+@extends('layouts.admin')
 
-    <div class="flex min-h-screen">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
-            <div class="p-6">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl">S</div>
-                    <div>
-                        <h1 class="font-bold text-lg leading-tight">SIRETA</h1>
-                        <p class="text-xs text-gray-500">Jelajahi Cita Rasa Kaltim</p>
-                    </div>
+@section('title', 'Dashboard Overview')
+
+@section('content')
+    <h2 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Overview</h2>
+    <p class="text-gray-600 mb-8">Ringkasan aktivitas dan statistik sistem</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total User -->
+        <div class="bg-white p-6 rounded-lg shadow border border-gray-100">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-gray-500">Total User</span>
+                <div class="bg-blue-100 p-2 rounded-lg">
+                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </div>
-
-                <nav class="space-y-1">
-                    <a href="{{ route('dashboard.admin') }}" class="flex items-center gap-3 px-3 py-2 bg-orange-50 text-orange-600 rounded-lg font-medium">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                        Dashboard
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                        Manajemen Kuliner
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-                        Moderasi Ulasan
-                    </a>
-                    <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        User Management
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg justify-between">
-                        <div class="flex items-center gap-3">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                            Feedback
-                        </div>
-                        <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">3</span>
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Riwayat Aktivitas
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        Settings & Guidelines
-                    </a>
-                </nav>
             </div>
-            
-            <div class="mt-auto p-6 border-t border-gray-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold">A</div>
-                    <div>
-                        <p class="text-sm font-semibold text-gray-800">Admin</p>
-                        <p class="text-xs text-gray-500">admin@kuliner.id</p>
-                    </div>
+            <h3 class="text-3xl font-bold text-gray-800">3</h3>
+            <p class="text-sm text-gray-500 mt-1">1 Banned</p>
+        </div>
+
+        <!-- Total Kuliner -->
+        <div class="bg-white p-6 rounded-lg shadow border border-gray-100">
+             <div class="flex justify-between items-start mb-4">
+                <span class="text-gray-500">Total Kuliner</span>
+                <div class="bg-green-100 p-2 rounded-lg">
+                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 </div>
-                <form action="{{ route('logout') }}" method="POST" class="mt-4">
-                    @csrf
-                    <button type="submit" class="w-full text-center text-red-600 hover:text-red-700 text-sm font-medium">Logout</button>
-                </form>
             </div>
-        </aside>
+            <h3 class="text-3xl font-bold text-gray-800">6</h3>
+            <p class="text-sm text-gray-500 mt-1">Published</p>
+        </div>
 
-        <!-- Main Content -->
-        <main class="ml-64 flex-1 p-8">
-            <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow">
-                <h1 class="text-2xl font-bold mb-4">Welcome, Admin!</h1>
-                <p>Select a menu item from the sidebar to get started.</p>
+        <!-- Total Ulasan Aktif -->
+        <div class="bg-white p-6 rounded-lg shadow border border-gray-100">
+             <div class="flex justify-between items-start mb-4">
+                <span class="text-gray-500">Total Ulasan Aktif</span>
+                <div class="bg-purple-100 p-2 rounded-lg">
+                    <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                </div>
             </div>
-        </main>
+            <h3 class="text-3xl font-bold text-gray-800">4</h3>
+            <p class="text-sm text-gray-500 mt-1">Active Reviews</p>
+        </div>
+
+        <!-- Feedback Belum Dibaca -->
+        <div class="bg-white p-6 rounded-lg shadow border border-red-100">
+             <div class="flex justify-between items-start mb-4">
+                <span class="text-gray-500">Feedback Belum Dibaca</span>
+                <div class="bg-red-100 p-2 rounded-lg">
+                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-800">3</h3>
+            <p class="text-sm text-gray-500 mt-1">Requires attention</p>
+        </div>
     </div>
-</body>
-</html>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Average Rating Global -->
+        <div class="bg-white p-6 rounded-lg shadow border border-gray-100">
+            <div class="flex items-center mb-2">
+                <svg class="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                <h3 class="font-semibold text-gray-800">Average Rating Global</h3>
+            </div>
+            <p class="text-4xl font-bold text-gray-800">4.6</p>
+            <p class="text-sm text-gray-500 mt-1">Dari 4 ulasan aktif</p>
+        </div>
+
+        <!-- Top Reported Content -->
+        <div class="bg-white p-6 rounded-lg shadow border border-gray-100">
+             <div class="flex items-center mb-2">
+                <svg class="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <h3 class="font-semibold text-gray-800">Top Reported Content</h3>
+            </div>
+            <p class="text-4xl font-bold text-gray-800">1</p>
+            <p class="text-sm text-gray-500 mt-1">Ulasan dengan laporan</p>
+        </div>
+    </div>
+
+    <!-- Charts Placeholders (Visual Only) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow border border-gray-100">
+            <h3 class="font-semibold text-gray-800 mb-4">Distribusi Rating (1-5)</h3>
+            <div class="h-40 flex items-end justify-between space-x-2">
+                 <!-- Placeholder Bars -->
+                 <div class="w-1/5 bg-gray-200 h-10 rounded-t"></div>
+                 <div class="w-1/5 bg-gray-200 h-20 rounded-t"></div>
+                 <div class="w-1/5 bg-orange-300 h-16 rounded-t"></div>
+                 <div class="w-1/5 bg-orange-400 h-32 rounded-t"></div>
+                 <div class="w-1/5 bg-orange-500 h-24 rounded-t"></div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow border border-gray-100">
+            <h3 class="font-semibold text-gray-800 mb-4">Trend Ulasan per Bulan</h3>
+            <div class="h-40 flex items-end">
+                <!-- Placeholder Line -->
+                <svg class="w-full h-full text-green-400" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M0 100 L20 80 L40 85 L60 60 L80 50 L100 20" stroke="currentColor" stroke-width="2" fill="none" />
+                </svg>
+            </div>
+        </div>
+    </div>
+@endsection
