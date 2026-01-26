@@ -1,12 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-<<<<<<< HEAD
 
 Route::get('/', function () {
     return view('welcome');
 });
-=======
 use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
@@ -28,4 +26,3 @@ Route::get('/dashboard/admin', function () {
 Route::get('/dashboard/user', function () {
     return view('dashboarduser');
 })->name('dashboard.user')->middleware(['auth', 'role:user']);
->>>>>>> e82c9977d329d16e1587d9f82aa8c0011d443111
