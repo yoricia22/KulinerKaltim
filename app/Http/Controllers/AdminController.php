@@ -4,12 +4,30 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Kuliner;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+     public function dashboard()
     {
-        return view('dashboardadmin');
+        $totalKuliner = Kuliner::count();
+        $totalUsers = User::where('role', 'user')->count();
+        // $totalReviews = Review::count(); // Uncomment jika sudah ada
+        // $avgRating = Review::avg('rating'); // Uncomment jika sudah ada
+        $totalReviews = 0; // Sementara
+        $avgRating = 0; // Sementara
+
+        $recentKuliner = Kuliner::latest()->take(5)->get();
+        $recentUsers = User::where('role', 'user')->latest()->take(5)->get();
+
+        return view('dashboardadmin', compact(
+            'totalKuliner',
+            'totalUsers',
+            'totalReviews',
+            'avgRating',
+            'recentKuliner',
+            'recentUsers'
+        ));
     }
 
     public function manageUsers()
