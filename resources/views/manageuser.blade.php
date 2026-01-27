@@ -53,10 +53,10 @@
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                         <span class="relative inline-block px-3 py-1 font-semibold leading-tight">
-                            @if($user->status == 'active')
+                            @if(!$user->is_banned)
                                 <span aria-hidden class="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
                                 <span class="relative text-green-900">Active</span>
-                            @elseif($user->status == 'banned')
+                            @elseif($user->is_banned)
                                 <span aria-hidden class="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
                                 <span class="relative text-red-900">Banned</span>
                             @endif
@@ -76,8 +76,8 @@
 
                              <form action="{{ route('admin.users.toggle-ban', $user->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to change this user status?');">
                                 @csrf
-                                <button type="submit" class="text-red-500 hover:text-red-600" title="{{ $user->status == 'banned' ? 'Unban' : 'Ban' }}">
-                                    @if($user->status == 'banned')
+                                <button type="submit" class="text-red-500 hover:text-red-600" title="{{ $user->is_banned ? 'Unban' : 'Ban' }}">
+                                    @if($user->is_banned)
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     @else
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>

@@ -25,6 +25,8 @@ Route::middleware(['auth', 'role:admin', 'status'])->prefix('dashboard/admin')->
 
     // User Management
     Route::get('/users', [AdminController::class, 'manageUsers'])->name('admin.users');
+    Route::get('/users/{user}/detail', [AdminController::class, 'getUserDetail'])->name('admin.users.detail');
+    Route::get('/users/export', [AdminController::class, 'exportUsers'])->name('admin.users.export');
     Route::post('/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('admin.users.toggle-ban');
     Route::get('/users/{user}/logs', [AdminController::class, 'logs'])->name('admin.users.logs');
 

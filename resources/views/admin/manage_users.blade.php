@@ -22,9 +22,7 @@
         <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
             <div class="p-6">
                 <div class="flex items-center gap-3 mb-8">
-                    <div
-                        class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                        S</div>
+                    <img src="{{ asset('images/Sireta logo.png') }}" alt="Sireta Logo" class="w-10 h-10 object-contain">
                     <div>
                         <h1 class="font-bold text-lg leading-tight">SIRETA</h1>
                         <p class="text-xs text-gray-500">Jelajahi Cita Rasa Kaltim</p>
@@ -286,6 +284,10 @@
                                 <p class="text-sm text-gray-500"
                                     x-text="selectedUser?.status === 'banned' ? 'Are you sure you want to unban ' + selectedUser?.name + '? They will be able to access their account again.' : 'Are you sure you want to ban ' + selectedUser?.name + '? They will lose access to their account.'">
                                 </p>
+                                <div class="mt-4" x-show="isBanning">
+                                    <label for="banReason" class="block text-sm font-medium text-gray-700">Reason</label>
+                                    <textarea id="banReason" x-model="banReason" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm" placeholder="Enter reason for banning..."></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -367,6 +369,7 @@
                 isBanning: true,
                 targetUserId: null,
                 targetUserName: '',
+                banReason: '',
                 selectedUser: {
                     name: '',
                     email: '',
@@ -376,7 +379,7 @@
                 logs: [],
 
                 openDetail(userId) {
-                    fetch(`/dashboard/admin/users/${userId}`)
+                    fetch(`/dashboard/admin/users/${userId}/detail`)
                         .then(res => res.json())
                         .then(data => {
                             this.selectedUser = {
@@ -393,6 +396,7 @@
                     this.targetUserId = userId;
                     this.isBanning = !isBanned; // If currently banned, we want to unban (so isBanning = false)
                     this.targetUserName = userName;
+                    this.banReason = '';
                     this.showBan = true;
                 },
 
@@ -403,7 +407,10 @@
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
                                     'content')
-                            }
+                            },
+                            body: JSON.stringify({
+                                reason: this.banReason
+                            })
                         })
                         .then(res => res.json())
                         .then(data => {
