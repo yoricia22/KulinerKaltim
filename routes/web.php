@@ -26,6 +26,7 @@ Route::middleware(['auth', 'role:admin', 'status'])->prefix('dashboard/admin')->
     // User Management
     Route::get('/users', [AdminController::class, 'manageUsers'])->name('admin.users');
     Route::post('/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('admin.users.toggle-ban');
+    Route::get('/users/{user}/logs', [AdminController::class, 'logs'])->name('admin.users.logs');
 
     // Kuliner Routes - dengan prefix dashboard/admin
     Route::get('/kuliner/manage', [KulinerController::class, 'manage'])->name('admin.kuliner.manage');

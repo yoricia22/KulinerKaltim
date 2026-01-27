@@ -35,7 +35,7 @@ class AdminUserController extends Controller
             'action' => $user->is_banned ? 'ban_user' : 'unban_user',
             'description' => ($user->is_banned ? 'Banned' : 'Unbanned') . " user {$user->name} ({$user->email})",
         ]);
-        
+
         // Also log for the target user so it shows in their history
         ActivityLog::create([
             'user_id' => $user->id,
