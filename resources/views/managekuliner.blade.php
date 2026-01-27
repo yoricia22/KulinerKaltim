@@ -103,11 +103,11 @@
                     class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 flex flex-col h-full">
                     <!-- Image (Clickable for Modal) -->
                     <div class="relative h-48 bg-gray-200 cursor-pointer" onclick="showDetail({{ $kuliner->id }})">
-                        @if ($kuliner->external_image_url)
-                            <img src="{{ $kuliner->external_image_url }}" alt="{{ $kuliner->nama_kuliner }}"
-                                class="w-full h-full object-cover">
-                        @elseif($kuliner->gambar)
+                        @if ($kuliner->gambar)
                             <img src="{{ asset('storage/' . $kuliner->gambar) }}" alt="{{ $kuliner->nama_kuliner }}"
+                                class="w-full h-full object-cover">
+                        @elseif($kuliner->external_image_url)
+                            <img src="{{ $kuliner->external_image_url }}" alt="{{ $kuliner->nama_kuliner }}"
                                 class="w-full h-full object-cover">
                         @else
                             <div class="flex items-center justify-center h-full text-gray-400">
@@ -300,12 +300,12 @@
                     document.getElementById('modalTitle').textContent = data.nama_kuliner;
 
                     let imageHtml = '';
-                    if (data.external_image_url) {
-                        imageHtml =
-                            `<img src="${data.external_image_url}" alt="${data.nama_kuliner}" class="w-full h-96 object-cover rounded-lg mb-6">`;
-                    } else if (data.gambar) {
+                    if (data.gambar) {
                         imageHtml =
                             `<img src="/storage/${data.gambar}" alt="${data.nama_kuliner}" class="w-full h-96 object-cover rounded-lg mb-6">`;
+                    } else if (data.external_image_url) {
+                        imageHtml =
+                            `<img src="${data.external_image_url}" alt="${data.nama_kuliner}" class="w-full h-96 object-cover rounded-lg mb-6">`;
                     }
 
                     let categoriesHtml = data.categories.map(cat =>
@@ -362,30 +362,30 @@
                     </div>
 
                     ${data.place ? `
-                        <div>
-                            <h4 class="text-sm font-semibold text-gray-500 uppercase mb-2">Lokasi</h4>
-                            <p class="text-gray-700 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                ${data.place.nama_tempat}
-                            </p>
-                        </div>
-                        ` : ''}
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-500 uppercase mb-2">Lokasi</h4>
+                                    <p class="text-gray-700 flex items-center">
+                                        <svg class="w-5 h-5 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                        ${data.place.nama_tempat}
+                                    </p>
+                                </div>
+                                ` : ''}
 
                     ${data.google_maps_url ? `
-                        <div>
-                            <a href="${data.google_maps_url}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 7m0 13V7"></path></svg>
-                                Lihat di Google Maps
-                            </a>
-                        </div>
-                        ` : ''}
+                                <div>
+                                    <a href="${data.google_maps_url}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 7m0 13V7"></path></svg>
+                                        Lihat di Google Maps
+                                    </a>
+                                </div>
+                                ` : ''}
 
                     ${data.creator ? `
-                        <div class="pt-4 border-t border-gray-200">
-                            <p class="text-sm text-gray-500">Dibuat oleh: <span class="font-medium text-gray-700">${data.creator.name}</span></p>
-                            <p class="text-sm text-gray-500">Pada: ${new Date(data.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                        </div>
-                        ` : ''}
+                                <div class="pt-4 border-t border-gray-200">
+                                    <p class="text-sm text-gray-500">Dibuat oleh: <span class="font-medium text-gray-700">${data.creator.name}</span></p>
+                                    <p class="text-sm text-gray-500">Pada: ${new Date(data.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                </div>
+                                ` : ''}
                 </div>
             `;
 
