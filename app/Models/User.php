@@ -22,7 +22,13 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'status',
     ];
+
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
