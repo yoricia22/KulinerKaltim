@@ -15,9 +15,7 @@
         <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
             <div class="p-6">
                 <div class="flex items-center gap-3 mb-8">
-                    <div
-                        class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                        S</div>
+                    <img src="{{ asset('images/Sireta logo.png') }}" alt="Sireta Logo" class="w-10 h-10 object-contain">
                     <div>
                         <h1 class="font-bold text-lg leading-tight">SIRETA</h1>
                         <p class="text-xs text-gray-500">Jelajahi Cita Rasa Kaltim</p>
@@ -201,26 +199,28 @@
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Kuliner Terbaru</h3>
                     <div class="space-y-3">
-                        @forelse($recentKuliner ?? [] as $kuliner)
+                        @if($recentKuliner && $recentKuliner->count() > 0)
+                        @foreach($recentKuliner as $kuliner)
                             <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition">
                                 <div class="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                                    @if ($kuliner->gambar)
-                                        <img src="{{ asset('storage/' . $kuliner->gambar) }}"
+                                    @if ($kuliner && $kuliner->gambar)
+                                        <img src="{{ asset('storage/' . ($kuliner->gambar ?? '')) }}"
                                             class="w-full h-full object-cover" alt="">
-                                    @elseif($kuliner->external_image_url)
-                                        <img src="{{ $kuliner->external_image_url }}"
+                                    @elseif($kuliner && $kuliner->external_image_url)
+                                        <img src="{{ $kuliner->external_image_url ?? '' }}"
                                             class="w-full h-full object-cover" alt=""
                                             onerror="this.style.display='none'">
                                     @endif
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="font-medium text-gray-800 truncate">{{ $kuliner->nama_kuliner }}</p>
-                                    <p class="text-sm text-gray-500">{{ $kuliner->asal_daerah }}</p>
+                                    <p class="font-medium text-gray-800 truncate">{{ $kuliner->nama_kuliner ?? 'N/A' }}</p>
+                                    <p class="text-sm text-gray-500">{{ $kuliner->asal_daerah ?? 'N/A' }}</p>
                                 </div>
                             </div>
-                        @empty
+                        @endforeach
+                        @else
                             <p class="text-gray-500 text-center py-4">Belum ada kuliner</p>
-                        @endforelse
+                        @endif
                     </div>
                 </div>
 
@@ -228,21 +228,23 @@
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">User Terbaru</h3>
                     <div class="space-y-3">
-                        @forelse($recentUsers ?? [] as $user)
+                        @if($recentUsers && $recentUsers->count() > 0)
+                        @foreach($recentUsers as $user)
                             <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition">
                                 <div
                                     class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold flex-shrink-0">
-                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    {{ $user && $user->name ? strtoupper(substr($user->name, 0, 1)) : 'U' }}
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="font-medium text-gray-800 truncate">{{ $user->name }}</p>
-                                    <p class="text-sm text-gray-500">{{ $user->email }}</p>
+                                    <p class="font-medium text-gray-800 truncate">{{ $user->name ?? 'Unknown' }}</p>
+                                    <p class="text-sm text-gray-500">{{ $user->email ?? 'N/A' }}</p>
                                 </div>
-                                <span class="text-xs text-gray-400">{{ $user->created_at->diffForHumans() }}</span>
+                                <span class="text-xs text-gray-400">{{ $user->created_at ? $user->created_at->diffForHumans() : 'N/A' }}</span>
                             </div>
-                        @empty
+                        @endforeach
+                        @else
                             <p class="text-gray-500 text-center py-4">Belum ada user</p>
-                        @endforelse
+                        @endif
                     </div>
                 </div>
             </div>

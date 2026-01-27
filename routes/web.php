@@ -25,7 +25,20 @@ Route::middleware(['auth', 'role:admin', 'status'])->prefix('dashboard/admin')->
 
     // User Management
     Route::get('/users', [AdminController::class, 'manageUsers'])->name('admin.users');
+    Route::get('/users/{user}/detail', [AdminController::class, 'getUserDetail'])->name('admin.users.detail');
+    Route::get('/users/export', [AdminController::class, 'exportUsers'])->name('admin.users.export');
     Route::post('/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('admin.users.toggle-ban');
+    Route::get('/users/{user}/logs', [AdminController::class, 'userLogs'])->name('admin.users.logs');
+
+    // Review Management
+    Route::get('/reviews', [AdminController::class, 'manageReviews'])->name('admin.reviews.index');
+    Route::post('/reviews/{review}/toggle-visibility', [AdminController::class, 'toggleReviewVisibility'])->name('admin.reviews.toggle-visibility');
+
+    // Activity Logs
+    Route::get('/activity-logs', [AdminController::class, 'activityLogs'])->name('admin.activity-logs');
+
+    // Settings
+    Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
 
     // Kuliner Routes - dengan prefix dashboard/admin
     Route::get('/kuliner/manage', [KulinerController::class, 'manage'])->name('admin.kuliner.manage');
