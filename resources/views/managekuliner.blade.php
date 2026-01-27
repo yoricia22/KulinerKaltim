@@ -103,21 +103,17 @@
                     class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 flex flex-col h-full">
                     <!-- Image (Clickable for Modal) -->
                     <div class="relative h-48 bg-gray-200 cursor-pointer" onclick="showDetail({{ $kuliner->id }})">
-                        @if ($kuliner->gambar)
-                            <img src="{{ asset('storage/' . $kuliner->gambar) }}" alt="{{ $kuliner->nama_kuliner }}"
-                                class="w-full h-full object-cover">
-                        @elseif($kuliner->external_image_url)
-                            <img src="{{ $kuliner->external_image_url }}" alt="{{ $kuliner->nama_kuliner }}"
-                                class="w-full h-full object-cover">
-                        @else
-                            <div class="flex items-center justify-center h-full text-gray-400">
-                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                    </path>
-                                </svg>
-                            </div>
-                        @endif
+                        @php
+                            $imgSrc = 'https://via.placeholder.com/640x360?text=No+Image';
+                            if ($kuliner->external_image_url) {
+                                $imgSrc = $kuliner->external_image_url;
+                            } elseif ($kuliner->gambar) {
+                                $imgSrc = asset('storage/' . $kuliner->gambar);
+                            }
+                        @endphp
+                        <img src="{{ $imgSrc }}" alt="{{ $kuliner->nama_kuliner }}"
+                            class="w-full h-full object-cover"
+                            onerror="this.onerror=null;this.src='https://via.placeholder.com/640x360?text=No+Image';">
 
                         <!-- Badges -->
                         <div class="absolute top-2 right-2 flex flex-col space-y-1 items-end">
@@ -301,13 +297,20 @@
                     document.getElementById('modalTitle').textContent = data.nama_kuliner;
 
                     let imageHtml = '';
-                    if (data.gambar) {
-                        imageHtml =
-                            `<img src="/storage/${data.gambar}" alt="${data.nama_kuliner}" class="w-full h-96 object-cover rounded-lg mb-6">`;
-                    } else if (data.external_image_url) {
-                        imageHtml =
-                            `<img src="${data.external_image_url}" alt="${data.nama_kuliner}" class="w-full h-96 object-cover rounded-lg mb-6">`;
+                    let imageUrl = '';
+
+                    if (data.external_image_url) {
+                        imageUrl = data.external_image_url;
+                    } else if (data.gambar) {
+                        imageUrl = `{{ asset('storage') }}/${data.gambar}`;
+                    } else {
+                        imageUrl = 'https://via.placeholder.com/640x360?text=No+Image';
                     }
+
+                    imageHtml = `<img src="${imageUrl}" alt="${data.nama_kuliner}"
+                        class="w-full h-96 object-cover rounded-lg mb-6"
+                        referrerpolicy="no-referrer"
+                        onerror="this.onerror=null;this.src='https://via.placeholder.com/640x360?text=No+Image';">`;
 
                     let categoriesHtml = data.categories.map(cat =>
                         `<span class="bg-orange-100 text-orange-600 text-sm px-3 py-1 rounded-full">${cat.nama_kategori}</span>`

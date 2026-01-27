@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\KulinerController;
+use App\Http\Controllers\UserDashboardController;
 
 Route::get('/', function () {
     return view('landingpage');
@@ -39,6 +40,13 @@ Route::middleware(['auth', 'role:admin', 'status'])->prefix('dashboard/admin')->
 });
 
 // User Routes
-Route::get('/dashboard/user', function () {
-    return view('dashboarduser');
-})->name('dashboard.user')->middleware(['auth', 'role:user', 'status']);
+Route::middleware(['auth', 'role:user', 'status'])->prefix('dashboard/user')->group(function () {
+    Route::get('/', [UserDashboardController::class, 'index'])->name('dashboard.user');
+
+    // API-like routes for AJAX interactions
+    Route::get('/kuliner/{id}', [UserDashboardController::class, 'show'])->name('user.kuliner.show');
+    Route::post('/kuliner/{kuliner}/favorite', [UserDashboardController::class, 'toggleFavorite'])->name('user.kuliner.favorite');
+    Route::post('/kuliner/{kuliner}/rate', [UserDashboardController::class, 'rate'])->name('user.kuliner.rate');
+    Route::post('/kuliner/{kuliner}/review', [UserDashboardController::class, 'storeReview'])->name('user.kuliner.review');
+    Route::post('/review/{review}/like', [UserDashboardController::class, 'toggleReviewLike'])->name('user.review.like');
+});
