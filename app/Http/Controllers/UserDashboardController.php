@@ -9,7 +9,9 @@ use App\Models\Review;
 use App\Models\Favorite;
 use App\Models\ReviewLike;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+
 
 class UserDashboardController extends Controller
 {
@@ -66,7 +68,7 @@ class UserDashboardController extends Controller
                 'average_rating' => $kuliner->average_rating
             ]);
         } catch (\Exception $e) {
-            \Log::error('Failed to load kuliner data: ' . $e->getMessage());
+            Log::error('Failed to load kuliner data: ' . $e->getMessage());
             return response()->json(['error' => 'Gagal memuat data: ' . $e->getMessage()], 500);
         }
     }
