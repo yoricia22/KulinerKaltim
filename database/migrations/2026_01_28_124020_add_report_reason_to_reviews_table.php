@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users_and_create_activity_logs', function (Blueprint $table) {
-            //
+        Schema::table('reviews', function (Blueprint $table) {
+            $table->text('report_reason')->nullable()->after('is_hidden');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users_and_create_activity_logs', function (Blueprint $table) {
-            //
+        Schema::table('reviews', function (Blueprint $table) {
+            $table->dropColumn('report_reason');
         });
     }
 };

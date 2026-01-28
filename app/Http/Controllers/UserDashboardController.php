@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 
+
 class UserDashboardController extends Controller
 {
     public function index(Request $request)
@@ -30,23 +31,67 @@ class UserDashboardController extends Controller
             });
         }
 
+        if ($request->filled('status')) {
+            $status = strtolower($request->status);
+            if ($status === 'halal') {
+                $query->where('is_halal', true);
+            } elseif ($status === 'non-halal' || $status === 'non_halal') {
+                $query->where('is_halal', false);
+            } elseif ($status === 'vegetarian') {
+                $query->where('is_vegetarian', true);
+            }
+        }
+
         $kuliners = $query->latest()->get();
         $categories = Category::all();
 
         return view('dashboarduser', compact('kuliners', 'categories'));
     }
 
+    public function favorites(Request $request)
+    {
+        $user = Auth::user();
+
+        // Get kuliner that are favorited by this user
+        $query = Kuliner::query()
+            ->with(['categories', 'place', 'ratings'])
+            ->whereHas('favorites', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+
+        if ($request->filled('search')) {
+            $query->where('nama_kuliner', 'like', '%' . $request->search . '%')
+                ->orWhere('asal_daerah', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('category')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('nama_kategori', $request->category);
+            });
+        }
+
+        $kuliners = $query->latest()->get();
+        $categories = Category::all();
+
+        return view('favorites', compact('kuliners', 'categories'));
+    }
+
     public function show($id)
     {
         try {
-            $kuliner = Kuliner::with(['categories', 'place', 'reviews.user', 'reviews.likes', 'ratings'])->findOrFail($id);
+            $kuliner = Kuliner::with(['categories', 'place', 'ratings'])->findOrFail($id);
 
             $user = Auth::user();
             $userRating = $kuliner->ratings()->where('user_id', $user->id)->first();
             $isFavorited = $kuliner->isFavoritedBy($user);
 
             // Transform reviews to include isLikedBy current user
-            $reviews = $kuliner->reviews()->with('user')->latest()->get()->map(function ($review) use ($user) {
+            $reviews = $kuliner->reviews()
+                ->where('is_hidden', false)
+                ->with('user')
+                ->latest()
+                ->get()
+                ->map(function ($review) use ($user) {
                 return [
                     'id' => $review->id,
                     'ulasan' => $review->ulasan,

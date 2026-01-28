@@ -31,6 +31,15 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
+            if ($user->status === 'banned') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->withErrors([
+                    'email' => 'Akun Anda telah dibanned. Hubungi admin untuk informasi lebih lanjut.',
+                ])->onlyInput('email');
+            }
+
             if ($user->role === 'admin') {
                 return redirect()->route('dashboard.admin');
             }

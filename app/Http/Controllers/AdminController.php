@@ -38,10 +38,11 @@ class AdminController extends Controller
 
     public function toggleBan(User $user)
     {
-        $user->is_banned = !$user->is_banned;
+        // Toggle status between 'active' and 'banned'
+        $user->status = $user->status === 'banned' ? 'active' : 'banned';
         $user->save();
 
-        $status = $user->is_banned ? 'banned' : 'unbanned';
-        return redirect()->back()->with('success', "User has been {$status} successfully.");
+        $statusMessage = $user->status === 'banned' ? 'banned' : 'unbanned';
+        return redirect()->back()->with('success', "User has been {$statusMessage} successfully.");
     }
 }

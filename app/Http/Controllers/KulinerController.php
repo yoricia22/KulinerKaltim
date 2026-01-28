@@ -173,4 +173,54 @@ class KulinerController extends Controller
             return redirect()->route('admin.kuliner.manage')->with('error', 'Gagal menghapus kuliner!');
         }
     }
+
+    public function landing(Request $request)
+    {
+        $query = Kuliner::query()->with(['categories', 'place', 'ratings', 'reviews.user']);
+
+        if ($request->filled('search')) {
+            $query->where('nama_kuliner', 'like', '%' . $request->search . '%')
+                ->orWhere('asal_daerah', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('category')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('nama_kategori', $request->category);
+            });
+        }
+
+        $kuliners = $query->latest()->get();
+        $categories = Category::all();
+
+        return view('landingpage', compact('kuliners', 'categories'));
+    }
+
+    public function showGuest($id)
+    {
+        try {
+            $kuliner = Kuliner::with(['categories', 'place', 'reviews.user', 'ratings'])->findOrFail($id);
+
+            $reviews = $kuliner->reviews()->with('user')->latest()->get()->map(function ($review) {
+                return [
+                    'id' => $review->id,
+                    'ulasan' => $review->ulasan,
+                    'created_at' => $review->created_at,
+                    'user' => [
+                        'id' => $review->user->id,
+                        'name' => $review->user->name,
+                    ],
+                    'likes_count' => $review->likes()->count(),
+                ];
+            });
+
+            return response()->json([
+                'kuliner' => $kuliner,
+                'reviews' => $reviews,
+                'average_rating' => $kuliner->average_rating
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Data tidak ditemukan'], 404);
+        }
+    }
 }
+

@@ -1,18 +1,18 @@
 @extends('layouts.user')
 
-@section('title', 'Dashboard User')
+@section('title', 'Favorit Saya')
 
 @section('content')
     <div class="mb-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">Jelajahi Kuliner</h2>
-            <p class="text-gray-600">Temukan cita rasa terbaik Kalimantan Timur.</p>
+            <h2 class="text-2xl font-bold text-gray-800">Favorit Saya</h2>
+            <p class="text-gray-600">Koleksi kuliner favorit yang telah kamu simpan.</p>
         </div>
     </div>
 
     <!-- Search and Filter -->
     <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-        <form action="{{ route('dashboard.user') }}" method="GET"
+        <form action="{{ route('user.favorites') }}" method="GET"
             class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4">
             <div class="flex-1">
                 <input type="text" name="search" value="{{ request('search') }}"
@@ -32,20 +32,10 @@
                     @endforeach
                 </select>
             </div>
-            <div class="w-full md:w-1/4">
-                <select name="status"
-                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    onchange="this.form.submit()">
-                    <option value="">Semua Status</option>
-                    <option value="halal" {{ request('status') == 'halal' ? 'selected' : '' }}>Halal</option>
-                    <option value="non-halal" {{ request('status') == 'non-halal' ? 'selected' : '' }}>Non-Halal</option>
-                    <option value="vegetarian" {{ request('status') == 'vegetarian' ? 'selected' : '' }}>Vegetarian</option>
-                </select>
-            </div>
             <button type="submit"
                 class="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">Cari</button>
-            @if (request('search') || request('category') || request('status'))
-                <a href="{{ route('dashboard.user') }}"
+            @if (request('search') || request('category'))
+                <a href="{{ route('user.favorites') }}"
                     class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">Reset</a>
             @endif
         </form>
@@ -56,10 +46,15 @@
         <div class="bg-white rounded-lg shadow-md p-8 text-center">
             <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
                 </path>
             </svg>
-            <p class="text-xl text-gray-600 font-medium">Belum ada data kuliner.</p>
+            <p class="text-xl text-gray-600 font-medium mb-2">Belum ada favorit.</p>
+            <p class="text-sm text-gray-500">Mulai menambahkan kuliner favorit dari halaman dashboard!</p>
+            <a href="{{ route('dashboard.user') }}"
+                class="inline-block mt-4 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
+                Jelajahi Kuliner
+            </a>
         </div>
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -80,23 +75,22 @@
                             class="w-full h-full object-cover"
                             onerror="this.onerror=null;this.src='https://via.placeholder.com/640x360?text=No+Image';">
 
+                        <!-- Favorite Badge -->
+                        <div class="absolute top-2 left-2 bg-red-500 bg-opacity-95 px-2 py-1 rounded-lg shadow-sm flex items-center">
+                            <svg class="w-4 h-4 text-white mr-1 fill-current" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                                </path>
+                            </svg>
+                            <span class="text-xs font-semibold text-white">Favorit</span>
+                        </div>
+
                         <!-- Rating Badge -->
                         <div class="absolute top-2 right-2 bg-white bg-opacity-90 px-2 py-1 rounded-lg shadow-sm flex items-center">
                             <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                             </svg>
                             <span class="text-sm font-bold text-gray-800">{{ number_format($kuliner->average_rating, 1) }}</span>
-                        </div>
-                        <!-- Status Badges -->
-                        <div class="absolute top-2 left-2 flex flex-col space-y-1">
-                            @if ($kuliner->is_halal)
-                                <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full shadow-sm">Halal</span>
-                            @else
-                                <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full shadow-sm">Non-Halal</span>
-                            @endif
-                            @if ($kuliner->is_vegetarian)
-                                <span class="bg-green-600 text-white text-xs px-2 py-1 rounded-full shadow-sm">Vegetarian</span>
-                            @endif
                         </div>
                     </div>
 
@@ -117,23 +111,6 @@
                                     <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">{{ $cat->nama_kategori }}</span>
                                 @endforeach
                             </div>
-                        </div>
-                        <div class="mt-4 pt-3 border-t border-gray-100">
-                            @php
-                                $mapsUrl = $kuliner->google_maps_url;
-                                if (!$mapsUrl && $kuliner->place && $kuliner->place->latitude && $kuliner->place->longitude) {
-                                    $mapsUrl = 'https://www.google.com/maps?q=' . $kuliner->place->latitude . ',' . $kuliner->place->longitude;
-                                }
-                            @endphp
-                            @if ($mapsUrl)
-                                <a href="{{ $mapsUrl }}" target="_blank" onclick="event.stopPropagation()"
-                                   class="inline-flex items-center px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 7m0 13V7"></path>
-                                    </svg>
-                                    Maps
-                                </a>
-                            @endif
                         </div>
                     </div>
                 </div>
@@ -191,17 +168,6 @@
                     <div id="modalBadges" class="flex flex-wrap gap-2 mb-6"></div>
 
                     <p id="modalDesc" class="text-gray-700 leading-relaxed mb-8"></p>
-
-                    <div id="modalLocation" class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Lokasi</h3>
-                        <p id="modalPlaceName" class="text-sm text-gray-600 mb-3"></p>
-                        <a id="modalMapsBtn" href="#" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 7m0 13V7"></path>
-                            </svg>
-                            Lihat di Google Maps
-                        </a>
-                    </div>
 
                     <!-- User Rating Section -->
                     <div class="border-t border-gray-200 pt-6 mb-6">
@@ -308,22 +274,6 @@
             });
             document.getElementById('modalBadges').innerHTML = badgesHtml;
 
-            // Location & Maps button
-            const placeName = k.place && k.place.nama_tempat ? k.place.nama_tempat : '';
-            document.getElementById('modalPlaceName').textContent = placeName;
-            let mapsUrl = k.google_maps_url || '';
-            if (!mapsUrl && k.place && k.place.latitude && k.place.longitude) {
-                mapsUrl = `https://www.google.com/maps?q=${k.place.latitude},${k.place.longitude}`;
-            }
-            const mapsBtn = document.getElementById('modalMapsBtn');
-            if (mapsUrl) {
-                mapsBtn.href = mapsUrl;
-                mapsBtn.classList.remove('pointer-events-none', 'opacity-50');
-            } else {
-                mapsBtn.href = '#';
-                mapsBtn.classList.add('pointer-events-none', 'opacity-50');
-            }
-
             // Favorite Button State
             updateFavoriteBtn(data.is_favorited);
 
@@ -360,6 +310,10 @@
             .then(res => res.json())
             .then(data => {
                 updateFavoriteBtn(data.status === 'added');
+                // Reload page if favorite was removed on favorites page
+                if (data.status === 'removed') {
+                    location.reload();
+                }
             })
             .catch(err => console.error(err));
         }
@@ -419,8 +373,7 @@
                 if(data.status === 'success') {
                     input.value = '';
                     // Reload reviews - simplistic approach: fetch modal data again or prepend
-                    // For simplicity, let's prepend manually or re-fetch.
-                    // Let's just re-fetch the modal data to be safe and consistent
+                    // For simplicity, let's just re-fetch the modal data to be safe and consistent
                     openKulinerModal(currentKulinerId);
                 }
             })

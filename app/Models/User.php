@@ -23,28 +23,7 @@ class User extends Authenticatable
         'password',
         'role',
         'status',
-        'is_banned',
     ];
-
-    public function activityLogs()
-    {
-        return $this->hasMany(ActivityLog::class);
-    }
-
-    public function favorites()
-    {
-        return $this->hasMany(Favorite::class);
-    }
-
-    public function reviews()
-    {
-        return $this->hasMany(Review::class);
-    }
-
-    public function ratings()
-    {
-        return $this->hasMany(Rating::class);
-    }
 
     /**
      * The attributes that should be hidden for serialization.
