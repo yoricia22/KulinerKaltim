@@ -6,9 +6,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\KulinerController;
 use App\Http\Controllers\UserDashboardController;
 
-Route::get('/', function () {
-    return view('landingpage');
-})->name('landing');
+Route::get('/', [KulinerController::class, 'landing'])->name('landing');
+Route::get('/api/kuliner/{id}', [KulinerController::class, 'showGuest'])->name('kuliner.show.guest');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
