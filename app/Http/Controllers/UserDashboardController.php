@@ -28,6 +28,17 @@ class UserDashboardController extends Controller
             });
         }
 
+        if ($request->filled('status')) {
+            $status = strtolower($request->status);
+            if ($status === 'halal') {
+                $query->where('is_halal', true);
+            } elseif ($status === 'non-halal' || $status === 'non_halal') {
+                $query->where('is_halal', false);
+            } elseif ($status === 'vegetarian') {
+                $query->where('is_vegetarian', true);
+            }
+        }
+
         $kuliners = $query->latest()->get();
         $categories = Category::all();
 

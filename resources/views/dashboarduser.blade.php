@@ -32,9 +32,19 @@
                     @endforeach
                 </select>
             </div>
+            <div class="w-full md:w-1/4">
+                <select name="status"
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    onchange="this.form.submit()">
+                    <option value="">Semua Status</option>
+                    <option value="halal" {{ request('status') == 'halal' ? 'selected' : '' }}>Halal</option>
+                    <option value="non-halal" {{ request('status') == 'non-halal' ? 'selected' : '' }}>Non-Halal</option>
+                    <option value="vegetarian" {{ request('status') == 'vegetarian' ? 'selected' : '' }}>Vegetarian</option>
+                </select>
+            </div>
             <button type="submit"
                 class="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">Cari</button>
-            @if (request('search') || request('category'))
+            @if (request('search') || request('category') || request('status'))
                 <a href="{{ route('dashboard.user') }}"
                     class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">Reset</a>
             @endif
@@ -77,6 +87,17 @@
                             </svg>
                             <span class="text-sm font-bold text-gray-800">{{ number_format($kuliner->average_rating, 1) }}</span>
                         </div>
+                        <!-- Status Badges -->
+                        <div class="absolute top-2 left-2 flex flex-col space-y-1">
+                            @if ($kuliner->is_halal)
+                                <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full shadow-sm">Halal</span>
+                            @else
+                                <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full shadow-sm">Non-Halal</span>
+                            @endif
+                            @if ($kuliner->is_vegetarian)
+                                <span class="bg-green-600 text-white text-xs px-2 py-1 rounded-full shadow-sm">Vegetarian</span>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="p-4 flex-1 flex flex-col">
@@ -96,6 +117,23 @@
                                     <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">{{ $cat->nama_kategori }}</span>
                                 @endforeach
                             </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-100">
+                            @php
+                                $mapsUrl = $kuliner->google_maps_url;
+                                if (!$mapsUrl && $kuliner->place && $kuliner->place->latitude && $kuliner->place->longitude) {
+                                    $mapsUrl = 'https://www.google.com/maps?q=' . $kuliner->place->latitude . ',' . $kuliner->place->longitude;
+                                }
+                            @endphp
+                            @if ($mapsUrl)
+                                <a href="{{ $mapsUrl }}" target="_blank" onclick="event.stopPropagation()"
+                                   class="inline-flex items-center px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 7m0 13V7"></path>
+                                    </svg>
+                                    Maps
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -153,6 +191,17 @@
                     <div id="modalBadges" class="flex flex-wrap gap-2 mb-6"></div>
 
                     <p id="modalDesc" class="text-gray-700 leading-relaxed mb-8"></p>
+
+                    <div id="modalLocation" class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Lokasi</h3>
+                        <p id="modalPlaceName" class="text-sm text-gray-600 mb-3"></p>
+                        <a id="modalMapsBtn" href="#" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 7m0 13V7"></path>
+                            </svg>
+                            Lihat di Google Maps
+                        </a>
+                    </div>
 
                     <!-- User Rating Section -->
                     <div class="border-t border-gray-200 pt-6 mb-6">
@@ -258,6 +307,22 @@
                 badgesHtml += `<span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full font-medium ml-2">${cat.nama_kategori}</span>`;
             });
             document.getElementById('modalBadges').innerHTML = badgesHtml;
+
+            // Location & Maps button
+            const placeName = k.place && k.place.nama_tempat ? k.place.nama_tempat : '';
+            document.getElementById('modalPlaceName').textContent = placeName;
+            let mapsUrl = k.google_maps_url || '';
+            if (!mapsUrl && k.place && k.place.latitude && k.place.longitude) {
+                mapsUrl = `https://www.google.com/maps?q=${k.place.latitude},${k.place.longitude}`;
+            }
+            const mapsBtn = document.getElementById('modalMapsBtn');
+            if (mapsUrl) {
+                mapsBtn.href = mapsUrl;
+                mapsBtn.classList.remove('pointer-events-none', 'opacity-50');
+            } else {
+                mapsBtn.href = '#';
+                mapsBtn.classList.add('pointer-events-none', 'opacity-50');
+            }
 
             // Favorite Button State
             updateFavoriteBtn(data.is_favorited);
