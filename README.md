@@ -129,6 +129,8 @@ Nama PC: Widhi Nur Maulida
 - Composer
 - MySQL
 - XAMPP
+- Laragon
+- Dbeaver
 - Node.js & npm
 
 ### Langkah Instalasi

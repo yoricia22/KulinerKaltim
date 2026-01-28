@@ -10,6 +10,7 @@ use App\Models\Favorite;
 use App\Models\ReviewLike;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class UserDashboardController extends Controller
 {
@@ -45,6 +46,34 @@ class UserDashboardController extends Controller
         return view('dashboarduser', compact('kuliners', 'categories'));
     }
 
+    public function favorites(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Get kuliner that are favorited by this user
+        $query = Kuliner::query()
+            ->with(['categories', 'place', 'ratings'])
+            ->whereHas('favorites', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+
+        if ($request->filled('search')) {
+            $query->where('nama_kuliner', 'like', '%' . $request->search . '%')
+                ->orWhere('asal_daerah', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('category')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('nama_kategori', $request->category);
+            });
+        }
+
+        $kuliners = $query->latest()->get();
+        $categories = Category::all();
+
+        return view('favorites', compact('kuliners', 'categories'));
+    }
+
     public function show($id)
     {
         try {
@@ -77,7 +106,7 @@ class UserDashboardController extends Controller
                 'average_rating' => $kuliner->average_rating
             ]);
         } catch (\Exception $e) {
-            \Log::error('Failed to load kuliner data: ' . $e->getMessage());
+            Log::error('Failed to load kuliner data: ' . $e->getMessage());
             return response()->json(['error' => 'Gagal memuat data: ' . $e->getMessage()], 500);
         }
     }

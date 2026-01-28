@@ -11,16 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_banned')->default(false)->after('role');
-        });
-
-        Schema::create('activity_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('action'); // e.g., 'login', 'review', 'ban'
-            $table->text('description')->nullable();
-            $table->timestamps();
+        Schema::table('users_and_create_activity_logs', function (Blueprint $table) {
+            //
         });
     }
 
@@ -29,10 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('is_banned');
+        Schema::table('users_and_create_activity_logs', function (Blueprint $table) {
+            //
         });
-
-        Schema::dropIfExists('activity_logs');
     }
 };
