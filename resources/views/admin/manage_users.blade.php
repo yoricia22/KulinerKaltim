@@ -22,7 +22,9 @@
         <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
             <div class="p-6">
                 <div class="flex items-center gap-3 mb-8">
-                    <img src="{{ asset('images/Sireta logo.png') }}" alt="Sireta Logo" class="w-10 h-10 object-contain">
+                    <div
+                        class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                        S</div>
                     <div>
                         <h1 class="font-bold text-lg leading-tight">SIRETA</h1>
                         <p class="text-xs text-gray-500">Jelajahi Cita Rasa Kaltim</p>
@@ -245,52 +247,59 @@
     </div>
 
     <!-- Ban Confirmation Modal -->
-    <div x-show="showBan" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title"
-        role="dialog" aria-modal="true">
+    <div x-show="banModalOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div x-show="showBan" @click="showBan = false"
-                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <div x-show="banModalOpen" @click="banModalOpen = false" class="fixed inset-0 transition-opacity"
+                aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div x-show="showBan"
-                class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+
+            <div x-show="banModalOpen"
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start">
-                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full sm:mx-0 sm:h-10 sm:w-10"
-                            :class="isBanning ? 'bg-red-100' : 'bg-green-100'">
-                            <svg x-show="isBanning" class="h-6 w-6 text-red-600" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                                </path>
-                            </svg>
-                            <svg x-show="!isBanning" class="h-6 w-6 text-green-600" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                        <div
+                            class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full sm:mx-0 sm:h-10 sm:w-10"
+                            :class="selectedUser?.status === 'banned' ? 'bg-green-100' : 'bg-red-100'">
+                            <template x-if="selectedUser?.status === 'banned'">
+                                <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </template>
+                            <template x-if="selectedUser?.status !== 'banned'">
+                                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </template>
                         </div>
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                             <h3 class="text-lg leading-6 font-medium text-gray-900"
-                                x-text="isBanning ? 'Ban User' : 'Unban User'"></h3>
+                                x-text="selectedUser?.status === 'banned' ? 'Unban User' : 'Ban User'">
+                            </h3>
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500"
-                                    x-text="isBanning ? 'Are you sure you want to ban ' + targetUserName + '? They will no longer be able to log in.' : 'Are you sure you want to unban ' + targetUserName + '? They will regain access to the platform.'">
+                                    x-text="selectedUser?.status === 'banned' ? 'Are you sure you want to unban ' + selectedUser?.name + '? They will be able to access their account again.' : 'Are you sure you want to ban ' + selectedUser?.name + '? They will lose access to their account.'">
                                 </p>
-                                <div class="mt-4" x-show="isBanning">
-                                    <label for="banReason" class="block text-sm font-medium text-gray-700">Reason</label>
-                                    <textarea id="banReason" x-model="banReason" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm" placeholder="Enter reason for banning..."></textarea>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" @click="confirmBan()"
-                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
-                        :class="isBanning ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'"
-                        x-text="isBanning ? 'Ban User' : 'Unban User'"></button>
-                    <button type="button" @click="showBan = false"
-                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
+                    <button type="button" @click="confirmBan"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                        :class="selectedUser?.status === 'banned' ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-red-600 hover:bg-red-700 focus:ring-red-500'"
+                        x-text="selectedUser?.status === 'banned' ? 'Unban' : 'Ban'">
+                    </button>
+                    <button type="button" @click="banModalOpen = false"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
                 </div>
             </div>
         </div>
@@ -358,7 +367,6 @@
                 isBanning: true,
                 targetUserId: null,
                 targetUserName: '',
-                banReason: '',
                 selectedUser: {
                     name: '',
                     email: '',
@@ -368,7 +376,7 @@
                 logs: [],
 
                 openDetail(userId) {
-                    fetch(`/dashboard/admin/users/${userId}/detail`)
+                    fetch(`/dashboard/admin/users/${userId}`)
                         .then(res => res.json())
                         .then(data => {
                             this.selectedUser = {
@@ -385,7 +393,6 @@
                     this.targetUserId = userId;
                     this.isBanning = !isBanned; // If currently banned, we want to unban (so isBanning = false)
                     this.targetUserName = userName;
-                    this.banReason = '';
                     this.showBan = true;
                 },
 
@@ -396,10 +403,7 @@
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
                                     'content')
-                            },
-                            body: JSON.stringify({
-                                reason: this.banReason
-                            })
+                            }
                         })
                         .then(res => res.json())
                         .then(data => {

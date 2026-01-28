@@ -284,11 +284,17 @@
             console.log('Fetching kuliner detail from:', url);
 
             // Fetch data dengan URL yang benar
-            fetch(url)
-                .then(response => {
+            fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(async response => {
                     console.log('Response status:', response.status);
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
                     }
                     return response.json();
                 })
@@ -312,7 +318,7 @@
                         referrerpolicy="no-referrer"
                         onerror="this.onerror=null;this.src='https://via.placeholder.com/640x360?text=No+Image';">`;
 
-                    let categoriesHtml = data.categories.map(cat =>
+                    let categoriesHtml = (data.categories || []).map(cat =>
                         `<span class="bg-orange-100 text-orange-600 text-sm px-3 py-1 rounded-full">${cat.nama_kategori}</span>`
                     ).join('');
 
