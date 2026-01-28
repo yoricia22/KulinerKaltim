@@ -36,26 +36,39 @@ class UserDashboardController extends Controller
 
     public function show($id)
     {
-        $kuliner = Kuliner::with(['categories', 'place', 'reviews.user', 'reviews.likes', 'ratings'])->findOrFail($id);
+        try {
+            $kuliner = Kuliner::with(['categories', 'place', 'reviews.user', 'reviews.likes', 'ratings'])->findOrFail($id);
 
-        $user = Auth::user();
-        $userRating = $kuliner->ratings()->where('user_id', $user->id)->first();
-        $isFavorited = $kuliner->isFavoritedBy($user);
+            $user = Auth::user();
+            $userRating = $kuliner->ratings()->where('user_id', $user->id)->first();
+            $isFavorited = $kuliner->isFavoritedBy($user);
 
-        // Transform reviews to include isLikedBy current user
-        $reviews = $kuliner->reviews()->latest()->get()->map(function ($review) use ($user) {
-            $review->is_liked = $review->isLikedBy($user);
-            $review->likes_count = $review->likes()->count();
-            return $review;
-        });
+            // Transform reviews to include isLikedBy current user
+            $reviews = $kuliner->reviews()->with('user')->latest()->get()->map(function ($review) use ($user) {
+                return [
+                    'id' => $review->id,
+                    'ulasan' => $review->ulasan,
+                    'created_at' => $review->created_at,
+                    'user' => [
+                        'id' => $review->user->id,
+                        'name' => $review->user->name,
+                    ],
+                    'is_liked' => $review->isLikedBy($user),
+                    'likes_count' => $review->likes()->count(),
+                ];
+            });
 
-        return response()->json([
-            'kuliner' => $kuliner,
-            'user_rating' => $userRating ? $userRating->rating : 0,
-            'is_favorited' => $isFavorited,
-            'reviews' => $reviews,
-            'average_rating' => $kuliner->average_rating
-        ]);
+            return response()->json([
+                'kuliner' => $kuliner,
+                'user_rating' => $userRating ? $userRating->rating : 0,
+                'is_favorited' => $isFavorited,
+                'reviews' => $reviews,
+                'average_rating' => $kuliner->average_rating
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to load kuliner data: ' . $e->getMessage());
+            return response()->json(['error' => 'Gagal memuat data: ' . $e->getMessage()], 500);
+        }
     }
 
     public function toggleFavorite(Kuliner $kuliner)
