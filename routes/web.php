@@ -19,47 +19,45 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Admin Routes
-Route::middleware(['auth', 'role:admin', 'status'])->prefix('dashboard/admin')->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     // Dashboard
-    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard.admin');
-
+    Route::get('/dashboard/admin', [AdminController::class, 'dashboard'])->name('dashboard.admin');
+    
+    // Kuliner Management
+    Route::get('/admin/kuliner', [KulinerController::class, 'manage'])->name('admin.kuliner.manage');
+    Route::get('/admin/kuliner/create', [KulinerController::class, 'create'])->name('kuliner.create');
+    Route::post('/admin/kuliner', [KulinerController::class, 'store'])->name('kuliner.store');
+    Route::get('/admin/kuliner/{id}/edit', [KulinerController::class, 'edit'])->name('kuliner.edit');
+    Route::put('/admin/kuliner/{id}', [KulinerController::class, 'update'])->name('kuliner.update');
+    Route::delete('/admin/kuliner/{id}/delete', [KulinerController::class, 'destroy'])->name('kuliner.destroy');
+    Route::get('/dashboard/admin/kuliner/{id}/show', [KulinerController::class, 'show'])->name('kuliner.show');
+    
     // User Management
-    Route::get('/users', [AdminController::class, 'manageUsers'])->name('admin.users');
-    Route::get('/users/{user}/detail', [AdminController::class, 'getUserDetail'])->name('admin.users.detail');
-    Route::get('/users/export', [AdminController::class, 'exportUsers'])->name('admin.users.export');
-    Route::post('/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('admin.users.toggle-ban');
-    Route::get('/users/{user}/logs', [AdminController::class, 'userLogs'])->name('admin.users.logs');
-
-    // Review Management
-    Route::get('/reviews', [AdminController::class, 'manageReviews'])->name('admin.reviews.index');
-    Route::post('/reviews/{review}/toggle-visibility', [AdminController::class, 'toggleReviewVisibility'])->name('admin.reviews.toggle-visibility');
-
-    // Activity Logs
-    Route::get('/activity-logs', [AdminController::class, 'activityLogs'])->name('admin.activity-logs');
-
-    // Settings
-    Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
-
-    // Kuliner Routes - dengan prefix dashboard/admin
-    Route::get('/kuliner/manage', [KulinerController::class, 'manage'])->name('admin.kuliner.manage');
-    Route::get('/kuliner/create', [KulinerController::class, 'create'])->name('kuliner.create');
-    Route::post('/kuliner/store', [KulinerController::class, 'store'])->name('kuliner.store');
-
-    // Routes dengan parameter ID
-    Route::get('/kuliner/{id}/show', [KulinerController::class, 'show'])->name('kuliner.show');
-    Route::get('/kuliner/{id}/edit', [KulinerController::class, 'edit'])->name('kuliner.edit');
-    Route::put('/kuliner/{id}/update', [KulinerController::class, 'update'])->name('kuliner.update');
-    Route::delete('/kuliner/{id}/delete', [KulinerController::class, 'destroy'])->name('kuliner.destroy');
+    Route::get('/admin/users', [AdminController::class, 'manageUsers'])->name('admin.users');
+    Route::post('/admin/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('admin.users.toggle-ban');
+    
+    // Placeholder routes (coming soon features)
+    Route::get('/admin/reviews', function () {
+        return view('dashboardadmin');
+    })->name('admin.reviews.index');
+    
+    Route::get('/admin/activity-logs', function () {
+        return view('dashboardadmin');
+    })->name('admin.activity-logs');
+    
+    Route::get('/admin/settings', function () {
+        return view('dashboardadmin');
+    })->name('admin.settings');
 });
 
 // User Routes
-Route::middleware(['auth', 'role:user', 'status'])->prefix('dashboard/user')->group(function () {
-    Route::get('/', [UserDashboardController::class, 'index'])->name('dashboard.user');
-
-    // API-like routes for AJAX interactions
-    Route::get('/kuliner/{id}', [UserDashboardController::class, 'show'])->name('user.kuliner.show');
-    Route::post('/kuliner/{kuliner}/favorite', [UserDashboardController::class, 'toggleFavorite'])->name('user.kuliner.favorite');
-    Route::post('/kuliner/{kuliner}/rate', [UserDashboardController::class, 'rate'])->name('user.kuliner.rate');
-    Route::post('/kuliner/{kuliner}/review', [UserDashboardController::class, 'storeReview'])->name('user.kuliner.review');
-    Route::post('/review/{review}/like', [UserDashboardController::class, 'toggleReviewLike'])->name('user.review.like');
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/dashboard/user', [UserDashboardController::class, 'index'])->name('dashboard.user');
+    Route::get('/dashboard/user/favorites', [UserDashboardController::class, 'favorites'])->name('user.favorites');
+    Route::get('/dashboard/user/kuliner/{id}', [UserDashboardController::class, 'show'])->name('user.kuliner.show');
+    Route::post('/dashboard/user/kuliner/{kuliner}/favorite', [UserDashboardController::class, 'toggleFavorite'])->name('user.kuliner.favorite');
+    Route::post('/dashboard/user/kuliner/{kuliner}/rate', [UserDashboardController::class, 'rate'])->name('user.kuliner.rate');
+    Route::post('/dashboard/user/kuliner/{kuliner}/review', [UserDashboardController::class, 'storeReview'])->name('user.kuliner.review');
+    Route::post('/dashboard/user/review/{review}/like', [UserDashboardController::class, 'toggleReviewLike'])->name('user.review.like');
 });
+
