@@ -4,19 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 
 class AuthController extends Controller
 {
     public function showLogin()
     {
-        return view('login');
-    }
-
-    public function showRegister()
-    {
-        return view('register');
+        // Redirect to home if already logged in as admin
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return redirect()->route('dashboard.admin');
+        }
+        return view('adminlogin');
     }
 
     public function login(Request $request)
@@ -31,6 +28,16 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
+            // Only admin can login
+            if ($user->role !== 'admin') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->withErrors([
+                    'email' => 'Akses ditolak. Halaman ini hanya untuk administrator.',
+                ])->onlyInput('email');
+            }
+
             if ($user->status === 'banned') {
                 Auth::logout();
                 $request->session()->invalidate();
@@ -40,36 +47,12 @@ class AuthController extends Controller
                 ])->onlyInput('email');
             }
 
-            if ($user->role === 'admin') {
-                return redirect()->route('dashboard.admin');
-            }
-
-            return redirect()->route('dashboard.user');
+            return redirect()->route('dashboard.admin');
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'Email atau password salah.',
         ])->onlyInput('email');
-    }
-
-    public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'username' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-
-        $user = User::create([
-            'name' => $validated['username'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'user',
-        ]);
-
-        Auth::login($user);
-
-        return redirect()->route('dashboard.user');
     }
 
     public function logout(Request $request)

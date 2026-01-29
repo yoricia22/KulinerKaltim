@@ -47,7 +47,7 @@
                     @forelse ($reviews as $review)
                         <tr class="bg-white border-b hover:bg-gray-50">
                             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                {{ $review->user->name }}
+                                Anonymous
                             </td>
                             <td class="px-6 py-4">
                                 {{ $review->kuliner->nama_kuliner }}
@@ -83,7 +83,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 @if(!$review->is_hidden)
-                                    <button onclick="confirmDelete({{ $review->id }}, '{{ $review->user->name }}')" class="text-red-600 hover:text-red-900 font-medium">
+                                    <button onclick="confirmDelete({{ $review->id }})" class="text-red-600 hover:text-red-900 font-medium">
                                         Hapus
                                     </button>
                                 @else
@@ -113,7 +113,7 @@
                     </svg>
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 mb-2">Hapus Ulasan</h3>
-                <p class="text-sm text-gray-500">Apakah Anda yakin ingin menghapus ulasan dari <strong id="deleteUserName"></strong>?</p>
+                <p class="text-sm text-gray-500">Apakah Anda yakin ingin menghapus ulasan ini?</p>
             </div>
 
             <form id="deleteForm" method="POST" class="flex space-x-3">
@@ -126,13 +126,11 @@
     </div>
 
     <script>
-        function confirmDelete(id, name) {
+        function confirmDelete(id) {
             const modal = document.getElementById('deleteModal');
             const form = document.getElementById('deleteForm');
-            const nameSpan = document.getElementById('deleteUserName');
 
             form.action = `/admin/reviews/${id}`;
-            nameSpan.textContent = name;
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');

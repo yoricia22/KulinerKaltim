@@ -8,7 +8,7 @@
         <p class="text-gray-500 mt-1">Statistik dan ringkasan sistem Sireta</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-500">
             <div class="flex items-center justify-between">
                 <div>
@@ -19,22 +19,6 @@
                     <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                        </path>
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 text-sm font-medium">Total Users</p>
-                    <p class="text-3xl font-bold text-gray-800 mt-2">{{ $totalUsers ?? 0 }}</p>
-                </div>
-                <div class="bg-blue-100 p-3 rounded-full">
-                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
                         </path>
                     </svg>
                 </div>
@@ -104,23 +88,28 @@
         </div>
 
         <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">User Terbaru</h3>
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Ulasan Terbaru</h3>
             <div class="space-y-3">
-                @if($recentUsers && $recentUsers->count() > 0)
-                    @foreach($recentUsers as $user)
-                        <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition">
-                            <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold flex-shrink-0">
-                                {{ $user && $user->name ? strtoupper(substr($user->name, 0, 1)) : 'U' }}
+                @if(isset($recentReviews) && $recentReviews->count() > 0)
+                    @foreach($recentReviews as $review)
+                        <div class="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition">
+                            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="font-medium text-gray-800 truncate">{{ $user->name ?? 'Unknown' }}</p>
-                                <p class="text-sm text-gray-500">{{ $user->email ?? 'N/A' }}</p>
+                                <div class="flex justify-between items-start">
+                                    <p class="font-medium text-gray-800 truncate">Anonymous</p>
+                                    <span class="text-xs text-gray-400">{{ $review->created_at ? $review->created_at->diffForHumans() : 'N/A' }}</span>
+                                </div>
+                                <p class="text-sm text-gray-600 truncate">{{ $review->ulasan ?? 'N/A' }}</p>
+                                <p class="text-xs text-orange-500 mt-1">{{ $review->kuliner->nama_kuliner ?? 'N/A' }}</p>
                             </div>
-                            <span class="text-xs text-gray-400">{{ $user->created_at ? $user->created_at->diffForHumans() : 'N/A' }}</span>
                         </div>
                     @endforeach
                 @else
-                    <p class="text-gray-500 text-center py-4">Belum ada user</p>
+                    <p class="text-gray-500 text-center py-4">Belum ada ulasan</p>
                 @endif
             </div>
         </div>

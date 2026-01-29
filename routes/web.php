@@ -5,18 +5,27 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\KulinerController;
 use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\AdminFeedbackController;
 use App\Http\Controllers\AdminReviewController;
 use App\Http\Middleware\CheckStatus;
 
-Route::get('/', [KulinerController::class, 'landing'])->name('landing');
-Route::get('/api/kuliner/{id}', [KulinerController::class, 'showGuest'])->name('kuliner.show.guest');
+// Guest Routes (Main Landing Page)
+Route::get('/', [UserDashboardController::class, 'index'])->name('landing');
+Route::get('/api/kuliner/{id}', [UserDashboardController::class, 'show'])->name('kuliner.show.guest');
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+// Guest Favorites Page
+Route::get('/favorites', [UserDashboardController::class, 'favorites'])->name('guest.favorites');
 
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
+// Guest Actions (Session/Anonymous)
+Route::post('/guest/kuliner/{kuliner}/favorite', [UserDashboardController::class, 'guestToggleFavorite'])->name('guest.kuliner.favorite');
+Route::post('/guest/kuliner/{kuliner}/rate', [UserDashboardController::class, 'guestRate'])->name('guest.kuliner.rate');
+Route::post('/guest/kuliner/{kuliner}/review', [UserDashboardController::class, 'guestReview'])->name('guest.kuliner.review');
+Route::post('/guest/review/{review}/like', [UserDashboardController::class, 'guestToggleReviewLike'])->name('guest.review.like');
+Route::post('/guest/feedback', [UserDashboardController::class, 'storeFeedback'])->name('guest.feedback.store');
 
+// Admin Login Routes
+Route::get('/admin/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/admin/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Admin Routes
@@ -33,13 +42,15 @@ Route::middleware(['auth', 'role:admin', CheckStatus::class])->group(function ()
     Route::delete('/admin/kuliner/{id}/delete', [KulinerController::class, 'destroy'])->name('kuliner.destroy');
     Route::get('/dashboard/admin/kuliner/{id}/show', [KulinerController::class, 'show'])->name('kuliner.show');
 
-    // User Management
-    Route::get('/admin/users', [AdminController::class, 'manageUsers'])->name('admin.users');
-    Route::post('/admin/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('admin.users.toggle-ban');
-
     // Review Management
     Route::get('/admin/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
     Route::delete('/admin/reviews/{id}', [AdminReviewController::class, 'destroy'])->name('admin.reviews.destroy');
+
+    // Feedback Management
+    Route::get('/admin/feedback', [AdminFeedbackController::class, 'index'])->name('admin.feedback.index');
+    Route::get('/admin/feedback/{id}', [AdminFeedbackController::class, 'show'])->name('admin.feedback.show');
+    Route::post('/admin/feedback/{id}/read', [AdminFeedbackController::class, 'markAsRead'])->name('admin.feedback.read');
+    Route::delete('/admin/feedback/{id}', [AdminFeedbackController::class, 'destroy'])->name('admin.feedback.destroy');
 
     // Placeholder routes (coming soon features)
     Route::get('/admin/activity-logs', function () {
@@ -50,15 +61,3 @@ Route::middleware(['auth', 'role:admin', CheckStatus::class])->group(function ()
         return view('dashboardadmin');
     })->name('admin.settings');
 });
-
-// User Routes
-Route::middleware(['auth', 'role:user', CheckStatus::class])->group(function () {
-    Route::get('/dashboard/user', [UserDashboardController::class, 'index'])->name('dashboard.user');
-    Route::get('/dashboard/user/favorites', [UserDashboardController::class, 'favorites'])->name('user.favorites');
-    Route::get('/dashboard/user/kuliner/{id}', [UserDashboardController::class, 'show'])->name('user.kuliner.show');
-    Route::post('/dashboard/user/kuliner/{kuliner}/favorite', [UserDashboardController::class, 'toggleFavorite'])->name('user.kuliner.favorite');
-    Route::post('/dashboard/user/kuliner/{kuliner}/rate', [UserDashboardController::class, 'rate'])->name('user.kuliner.rate');
-    Route::post('/dashboard/user/kuliner/{kuliner}/review', [UserDashboardController::class, 'storeReview'])->name('user.kuliner.review');
-    Route::post('/dashboard/user/review/{review}/like', [UserDashboardController::class, 'toggleReviewLike'])->name('user.review.like');
-});
-

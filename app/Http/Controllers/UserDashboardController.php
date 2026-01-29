@@ -6,23 +6,55 @@ use App\Models\Kuliner;
 use App\Models\Category;
 use App\Models\Rating;
 use App\Models\Review;
-use App\Models\Favorite;
 use App\Models\ReviewLike;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-
-
+use Illuminate\Support\Facades\Hash;
 
 class UserDashboardController extends Controller
 {
+    /**
+     * Get or create anonymous user ID for database operations
+     */
+    private function anonymousUserId(): int
+    {
+        $user = \App\Models\User::where('email', 'anonymous@sireta.local')->first();
+        if (!$user) {
+            $user = \App\Models\User::create([
+                'name' => 'Anonymous',
+                'email' => 'anonymous@sireta.local',
+                'password' => Hash::make(str()->random(16)),
+                'role' => 'user',
+                'status' => 'active',
+            ]);
+        }
+        return $user->id;
+    }
+
+    /**
+     * Get session-based identifier for likes tracking
+     */
+    private function getSessionId(): string
+    {
+        if (!session()->has('guest_id')) {
+            session()->put('guest_id', str()->random(32));
+        }
+        return session()->get('guest_id');
+    }
+
+    /**
+     * Main landing page - guest dashboard
+     */
     public function index(Request $request)
     {
         $query = Kuliner::query()->with(['categories', 'place', 'ratings']);
 
         if ($request->filled('search')) {
-            $query->where('nama_kuliner', 'like', '%' . $request->search . '%')
-                ->orWhere('asal_daerah', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_kuliner', 'like', '%' . $search . '%')
+                  ->orWhere('asal_daerah', 'like', '%' . $search . '%');
+            });
         }
 
         if ($request->filled('category')) {
@@ -44,70 +76,89 @@ class UserDashboardController extends Controller
 
         $kuliners = $query->latest()->get();
         $categories = Category::all();
+        
+        // Get session favorites for highlighting
+        $sessionFavorites = session()->get('favorites', []);
 
-        return view('dashboarduser', compact('kuliners', 'categories'));
+        return view('landingpage', compact('kuliners', 'categories', 'sessionFavorites'));
     }
 
+    /**
+     * Favorites page - session-based
+     */
     public function favorites(Request $request)
     {
-        $user = Auth::user();
+        $favoriteIds = session()->get('favorites', []);
+        
+        if (empty($favoriteIds)) {
+            $kuliners = collect([]);
+        } else {
+            $query = Kuliner::query()
+                ->with(['categories', 'place', 'ratings'])
+                ->whereIn('id', $favoriteIds);
 
-        // Get kuliner that are favorited by this user
-        $query = Kuliner::query()
-            ->with(['categories', 'place', 'ratings'])
-            ->whereHas('favorites', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            });
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('nama_kuliner', 'like', '%' . $search . '%')
+                      ->orWhere('asal_daerah', 'like', '%' . $search . '%');
+                });
+            }
 
-        if ($request->filled('search')) {
-            $query->where('nama_kuliner', 'like', '%' . $request->search . '%')
-                ->orWhere('asal_daerah', 'like', '%' . $request->search . '%');
+            if ($request->filled('category')) {
+                $query->whereHas('categories', function ($q) use ($request) {
+                    $q->where('nama_kategori', $request->category);
+                });
+            }
+
+            $kuliners = $query->latest()->get();
         }
 
-        if ($request->filled('category')) {
-            $query->whereHas('categories', function ($q) use ($request) {
-                $q->where('nama_kategori', $request->category);
-            });
-        }
-
-        $kuliners = $query->latest()->get();
         $categories = Category::all();
 
         return view('favorites', compact('kuliners', 'categories'));
     }
 
+    /**
+     * Show kuliner detail - API endpoint
+     */
     public function show($id)
     {
         try {
             $kuliner = Kuliner::with(['categories', 'place', 'ratings'])->findOrFail($id);
 
-            $user = Auth::user();
-            $userRating = $kuliner->ratings()->where('user_id', $user->id)->first();
-            $isFavorited = $kuliner->isFavoritedBy($user);
+            $sessionFavorites = session()->get('favorites', []);
+            $isFavorited = in_array($kuliner->id, $sessionFavorites, true);
 
-            // Transform reviews to include isLikedBy current user
+            // Get session-based rating if exists
+            $sessionRatings = session()->get('ratings', []);
+            $userRating = $sessionRatings[$kuliner->id] ?? 0;
+
+            // Get session likes
+            $sessionLikes = session()->get('review_likes', []);
+
+            // Transform reviews to anonymous
             $reviews = $kuliner->reviews()
                 ->where('is_hidden', false)
-                ->with('user')
                 ->latest()
                 ->get()
-                ->map(function ($review) use ($user) {
-                return [
-                    'id' => $review->id,
-                    'ulasan' => $review->ulasan,
-                    'created_at' => $review->created_at,
-                    'user' => [
-                        'id' => $review->user->id,
-                        'name' => $review->user->name,
-                    ],
-                    'is_liked' => $review->isLikedBy($user),
-                    'likes_count' => $review->likes()->count(),
-                ];
-            });
+                ->map(function ($review) use ($sessionLikes) {
+                    return [
+                        'id' => $review->id,
+                        'ulasan' => $review->ulasan,
+                        'created_at' => $review->created_at,
+                        'user' => [
+                            'id' => 0,
+                            'name' => 'Anonymous',
+                        ],
+                        'is_liked' => in_array($review->id, $sessionLikes, true),
+                        'likes_count' => $review->likes()->count(),
+                    ];
+                });
 
             return response()->json([
                 'kuliner' => $kuliner,
-                'user_rating' => $userRating ? $userRating->rating : 0,
+                'user_rating' => $userRating,
                 'is_favorited' => $isFavorited,
                 'reviews' => $reviews,
                 'average_rating' => $kuliner->average_rating
@@ -118,68 +169,136 @@ class UserDashboardController extends Controller
         }
     }
 
-    public function toggleFavorite(Kuliner $kuliner)
+    /**
+     * Toggle favorite - session based
+     */
+    public function guestToggleFavorite(Kuliner $kuliner)
     {
-        $user = Auth::user();
-        if ($kuliner->isFavoritedBy($user)) {
-            $kuliner->favorites()->where('user_id', $user->id)->delete();
+        $favorites = session()->get('favorites', []);
+        if (in_array($kuliner->id, $favorites, true)) {
+            $favorites = array_values(array_filter($favorites, fn($id) => $id !== $kuliner->id));
+            session()->put('favorites', $favorites);
             return response()->json(['status' => 'removed']);
         } else {
-            Favorite::create([
-                'user_id' => $user->id,
-                'kuliner_id' => $kuliner->id
-            ]);
+            $favorites[] = $kuliner->id;
+            session()->put('favorites', $favorites);
             return response()->json(['status' => 'added']);
         }
     }
 
-    public function rate(Request $request, Kuliner $kuliner)
+    /**
+     * Rate kuliner - anonymous
+     */
+    public function guestRate(Request $request, Kuliner $kuliner)
     {
         $request->validate([
             'rating' => 'required|integer|min:1|max:5',
         ]);
 
-        $user = Auth::user();
-
+        $anonId = $this->anonymousUserId();
+        
+        // Store rating in database under anonymous user
         $rating = Rating::updateOrCreate(
-            ['user_id' => $user->id, 'kuliner_id' => $kuliner->id],
+            ['user_id' => $anonId, 'kuliner_id' => $kuliner->id],
             ['rating' => $request->rating]
         );
 
-        return response()->json(['status' => 'success', 'rating' => $rating->rating, 'average_rating' => $kuliner->average_rating]);
+        // Also store in session so user can see their rating
+        $sessionRatings = session()->get('ratings', []);
+        $sessionRatings[$kuliner->id] = $request->rating;
+        session()->put('ratings', $sessionRatings);
+
+        // Recalculate average
+        $kuliner->refresh();
+
+        return response()->json([
+            'status' => 'success',
+            'rating' => $request->rating,
+            'average_rating' => $kuliner->average_rating
+        ]);
     }
 
-    public function storeReview(Request $request, Kuliner $kuliner)
+    /**
+     * Submit review - anonymous
+     */
+    public function guestReview(Request $request, Kuliner $kuliner)
     {
         $request->validate([
             'ulasan' => 'required|string|max:1000',
         ]);
 
         $review = Review::create([
-            'user_id' => Auth::id(),
+            'user_id' => $this->anonymousUserId(),
             'kuliner_id' => $kuliner->id,
             'ulasan' => $request->ulasan,
         ]);
 
-        $review->load('user');
-
-        return response()->json(['status' => 'success', 'review' => $review]);
+        return response()->json([
+            'status' => 'success',
+            'review' => [
+                'id' => $review->id,
+                'ulasan' => $review->ulasan,
+                'created_at' => $review->created_at,
+                'user' => [
+                    'id' => 0,
+                    'name' => 'Anonymous',
+                ],
+                'is_liked' => false,
+                'likes_count' => 0,
+            ]
+        ]);
     }
 
-    public function toggleReviewLike(Review $review)
+    /**
+     * Toggle review like - session based
+     */
+    public function guestToggleReviewLike(Review $review)
     {
-        $user = Auth::user();
-        $like = ReviewLike::where('user_id', $user->id)->where('review_id', $review->id)->first();
-
-        if ($like) {
-            $like->delete();
+        $sessionLikes = session()->get('review_likes', []);
+        
+        if (in_array($review->id, $sessionLikes, true)) {
+            // Unlike - remove from session
+            $sessionLikes = array_values(array_filter($sessionLikes, fn($id) => $id !== $review->id));
+            session()->put('review_likes', $sessionLikes);
+            
+            // Also remove from database if exists
+            $anonId = $this->anonymousUserId();
+            ReviewLike::where('user_id', $anonId)->where('review_id', $review->id)->delete();
+            
             return response()->json(['status' => 'removed', 'likes_count' => $review->likes()->count()]);
         } else {
-            ReviewLike::create([
-                'user_id' => $user->id,
+            // Like - add to session
+            $sessionLikes[] = $review->id;
+            session()->put('review_likes', $sessionLikes);
+            
+            // Also add to database
+            $anonId = $this->anonymousUserId();
+            ReviewLike::firstOrCreate([
+                'user_id' => $anonId,
                 'review_id' => $review->id
             ]);
+            
             return response()->json(['status' => 'added', 'likes_count' => $review->likes()->count()]);
         }
+    }
+    public function storeFeedback(Request $request)
+    {
+        $request->validate([
+            'category' => 'required|string',
+            'subject' => 'nullable|string|max:255',
+            'message' => 'required|string',
+            'sender_name' => 'nullable|string|max:255',
+        ]);
+
+        \App\Models\Feedback::create([
+            'category' => $request->category,
+            'subject' => $request->subject ?: 'No Subject',
+            'sender_name' => $request->sender_name ?: 'Anonymous',
+            'message' => $request->message,
+            'device_info' => $request->header('User-Agent'),
+            'status' => 'unread',
+        ]);
+
+        return response()->json(['status' => 'success', 'message' => 'Feedback sent successfully!']);
     }
 }

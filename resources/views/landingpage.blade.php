@@ -35,19 +35,21 @@
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <a href="{{ route('guest.favorites') }}" class="text-gray-600 hover:text-orange-500 px-3 py-2 rounded-md text-sm font-medium flex items-center">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                        Favorit
+                        <span id="favCount" class="ml-1 bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full hidden">0</span>
+                    </a>
                     @auth
                         @if(Auth::user()->role === 'admin')
                             <a href="{{ route('dashboard.admin') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
-                        @else
-                            <a href="{{ route('dashboard.user') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
                         @endif
                         <form action="{{ route('logout') }}" method="POST" class="inline">
                             @csrf
                             <button type="submit" class="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-md text-sm font-medium">Logout</button>
                         </form>
-                    @else
-                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Login</a>
-                        <a href="{{ route('register') }}" class="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-md text-sm font-medium">Register</a>
                     @endauth
                 </div>
             </div>
@@ -87,8 +89,18 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="w-full md:w-1/4">
+                    <select name="status"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        onchange="this.form.submit()">
+                        <option value="">Semua Status</option>
+                        <option value="halal" {{ request('status') == 'halal' ? 'selected' : '' }}>Halal</option>
+                        <option value="non-halal" {{ request('status') == 'non-halal' ? 'selected' : '' }}>Non-Halal</option>
+                        <option value="vegetarian" {{ request('status') == 'vegetarian' ? 'selected' : '' }}>Vegetarian</option>
+                    </select>
+                </div>
                 <button type="submit" class="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">Cari</button>
-                @if (request('search') || request('category'))
+                @if (request('search') || request('category') || request('status'))
                     <a href="{{ route('landing') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">Reset</a>
                 @endif
             </form>
@@ -105,7 +117,7 @@
                 <p class="text-xl text-gray-600 font-medium">Belum ada data kuliner.</p>
             </div>
         @else
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 @foreach ($kuliners as $kuliner)
                     <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition duration-300 cursor-pointer"
                         onclick="openKulinerModal({{ $kuliner->id }})">
@@ -141,6 +153,15 @@
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                                 </svg>
                                 <span class="text-sm font-bold text-gray-800">{{ number_format($kuliner->average_rating, 1) }}</span>
+                            </div>
+
+                            <!-- Favorite indicator -->
+                            <div class="absolute bottom-2 right-2 favorite-indicator" data-id="{{ $kuliner->id }}" style="display: none;">
+                                <span class="bg-red-500 text-white p-1.5 rounded-full shadow">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                    </svg>
+                                </span>
                             </div>
                         </div>
 
@@ -212,8 +233,15 @@
                         </svg>
                     </button>
 
+                    <!-- Favorite Button -->
+                    <button id="btnFavorite" onclick="toggleFavorite()" class="absolute bottom-4 right-4 bg-white p-3 rounded-full shadow-lg text-gray-400 hover:scale-110 transition duration-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </button>
+
                     <!-- Maps Button in Modal -->
-                    <a id="modalMapsBtn" href="#" target="_blank" class="absolute bottom-4 right-4 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition hidden">
+                    <a id="modalMapsBtn" href="#" target="_blank" class="absolute bottom-4 left-4 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition hidden">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
                         </svg>
@@ -252,52 +280,32 @@
                         </h4>
                     </div>
 
-                    <!-- Rating Section - Locked for Guests -->
+                    <!-- Rating Section -->
                     <div class="border-t border-gray-200 pt-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Berikan Rating</h3>
-                        @auth
-                            <div class="flex items-center space-x-2">
-                                <div class="flex space-x-1" id="starRating">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <button onclick="submitRating({{ $i }})" class="star-btn w-8 h-8 text-gray-300 hover:text-yellow-400 focus:outline-none transition" data-value="{{ $i }}">
-                                            <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                                        </button>
-                                    @endfor
-                                </div>
-                                <span id="userRatingText" class="text-sm text-gray-500 ml-2"></span>
+                        <div class="flex items-center space-x-2">
+                            <div class="flex space-x-1" id="starRating">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <button onclick="submitRating({{ $i }})" class="star-btn w-8 h-8 text-gray-300 hover:text-yellow-400 focus:outline-none transition" data-value="{{ $i }}">
+                                        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                    </button>
+                                @endfor
                             </div>
-                        @else
-                            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
-                                <svg class="w-8 h-8 text-orange-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                </svg>
-                                <p class="text-gray-600 mb-3">Login untuk memberikan rating</p>
-                                <a href="{{ route('login') }}" class="inline-block px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium">Login Sekarang</a>
-                            </div>
-                        @endauth
+                            <span id="userRatingText" class="text-sm text-gray-500 ml-2"></span>
+                        </div>
                     </div>
 
-                    <!-- Reviews Section - Locked for Guests -->
+                    <!-- Reviews Section -->
                     <div class="border-t border-gray-200 pt-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Ulasan (<span id="reviewCount">0</span>)</h3>
 
-                        @auth
-                            <!-- Write Review -->
-                            <div class="mb-6">
-                                <textarea id="reviewInput" rows="3" class="w-full rounded-lg border border-gray-300 focus:ring-orange-500 focus:border-orange-500 p-3 text-sm" placeholder="Tulis pengalaman kulinermu disini..."></textarea>
-                                <div class="mt-2 text-right">
-                                    <button onclick="submitReview()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium">Kirim Ulasan</button>
-                                </div>
+                        <!-- Write Review -->
+                        <div class="mb-6">
+                            <textarea id="reviewInput" rows="3" class="w-full rounded-lg border border-gray-300 focus:ring-orange-500 focus:border-orange-500 p-3 text-sm" placeholder="Tulis pengalaman kulinermu disini... (Ulasan akan ditampilkan sebagai Anonymous)"></textarea>
+                            <div class="mt-2 text-right">
+                                <button onclick="submitReview()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium">Kirim Ulasan</button>
                             </div>
-                        @else
-                            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center mb-6">
-                                <svg class="w-8 h-8 text-orange-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                </svg>
-                                <p class="text-gray-600 mb-3">Login untuk menulis ulasan</p>
-                                <a href="{{ route('login') }}" class="inline-block px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium">Login Sekarang</a>
-                            </div>
-                        @endauth
+                        </div>
 
                         <!-- Review List -->
                         <div id="reviewList" class="space-y-4">
@@ -309,8 +317,98 @@
         </div>
     </div>
 
+    <!-- Feedback Floating Button -->
+    <button onclick="openFeedbackModal()" class="fixed bottom-6 right-6 bg-orange-600 text-white p-4 rounded-full shadow-lg hover:bg-orange-700 hover:scale-105 transition z-40 group flex items-center space-x-2">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
+        <span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap">Beri Masukan</span>
+    </button>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4" onclick="closeFeedbackModal(event)">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 transform transition-all scale-100" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Kirim Masukan</h3>
+                <button onclick="closeFeedbackModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <form id="feedbackForm" onsubmit="submitFeedback(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                        <select name="category" required class="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500">
+                            <option value="General">Umum</option>
+                            <option value="Bug">Laporan Bug</option>
+                            <option value="Feature Request">Request Fitur</option>
+                            <option value="Content">Masalah Konten</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Subjek (Opsional)</label>
+                        <input type="text" name="subject" class="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500" placeholder="Ringkasan masukan...">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pesan</label>
+                        <textarea name="message" rows="4" required class="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500" placeholder="Tulis masukan Anda disini..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama (Opsional)</label>
+                        <input type="text" name="sender_name" class="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500" placeholder="Anonymous">
+                    </div>
+
+                    <button type="submit" class="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition font-medium">Kirim Masukan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         let currentKulinerId = null;
+
+        // Initialize favorites from localStorage
+        function getFavorites() {
+            return JSON.parse(localStorage.getItem('favorites') || '[]');
+        }
+
+        function saveFavorites(favorites) {
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        }
+
+        // Update favorite count in nav
+        function updateFavCount() {
+            const count = getFavorites().length;
+            const badge = document.getElementById('favCount');
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        // Update favorite indicators on cards
+        function updateFavoriteIndicators() {
+            const favorites = getFavorites();
+            document.querySelectorAll('.favorite-indicator').forEach(el => {
+                const id = parseInt(el.dataset.id);
+                if (favorites.includes(id)) {
+                    el.style.display = 'block';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateFavCount();
+            updateFavoriteIndicators();
+        });
 
         function openKulinerModal(id) {
             currentKulinerId = id;
@@ -394,73 +492,62 @@
             });
             document.getElementById('modalBadges').innerHTML = badgesHtml;
 
+            // Favorite Button State (from localStorage)
+            const favorites = getFavorites();
+            updateFavoriteBtn(favorites.includes(currentKulinerId));
+
+            // User Rating State
+            updateStarDisplay(data.user_rating);
+
             // Reviews
             renderReviews(data.reviews);
         }
 
-        function renderReviews(reviews) {
-            const container = document.getElementById('reviewList');
-            document.getElementById('reviewCount').textContent = reviews.length;
-
-            if (reviews.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center py-4">Belum ada ulasan.</p>';
-                return;
-            }
-
-            container.innerHTML = reviews.map(r => `
-                <div class="flex space-x-3">
-                    <div class="flex-shrink-0">
-                        <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold">
-                            ${r.user.name.charAt(0)}
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <div class="bg-gray-50 rounded-lg p-3">
-                            <div class="flex justify-between items-start mb-1">
-                                <h4 class="text-sm font-bold text-gray-900">${r.user.name}</h4>
-                                <span class="text-xs text-gray-500">${new Date(r.created_at).toLocaleDateString('id-ID')}</span>
-                            </div>
-                            <p class="text-sm text-gray-700">${r.ulasan}</p>
-                        </div>
-                        <div class="flex items-center mt-1 text-xs text-gray-500">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
-                            </svg>
-                            ${r.likes_count} Suka
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function closeModal(event) {
-            if (event.target.id === 'detailModal') {
-                closeDetailModal();
+        function updateFavoriteBtn(isFavorited) {
+            const btn = document.getElementById('btnFavorite');
+            if (isFavorited) {
+                btn.classList.add('text-red-500');
+                btn.classList.remove('text-gray-400');
+                btn.querySelector('svg').classList.add('fill-current');
+            } else {
+                btn.classList.remove('text-red-500');
+                btn.classList.add('text-gray-400');
+                btn.querySelector('svg').classList.remove('fill-current');
             }
         }
 
-        function closeDetailModal() {
-            const modal = document.getElementById('detailModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            currentKulinerId = null;
-        }
+        function toggleFavorite() {
+            if (!currentKulinerId) return;
 
-        // Escape key to close modal
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeDetailModal();
+            let favorites = getFavorites();
+            const index = favorites.indexOf(currentKulinerId);
+            
+            if (index > -1) {
+                favorites.splice(index, 1);
+                updateFavoriteBtn(false);
+            } else {
+                favorites.push(currentKulinerId);
+                updateFavoriteBtn(true);
             }
-        });
+            
+            saveFavorites(favorites);
+            updateFavCount();
+            updateFavoriteIndicators();
 
-        @auth
-        // Only include these functions if user is logged in
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            // Sync with server
+            fetch(`/guest/kuliner/${currentKulinerId}/favorite`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            }).catch(err => console.error(err));
+        }
 
         function submitRating(rating) {
             if (!currentKulinerId) return;
 
-            fetch(`/dashboard/user/kuliner/${currentKulinerId}/rate`, {
+            fetch(`/guest/kuliner/${currentKulinerId}/rate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -499,7 +586,7 @@
             const ulasan = input.value.trim();
             if (!ulasan || !currentKulinerId) return;
 
-            fetch(`/dashboard/user/kuliner/${currentKulinerId}/review`, {
+            fetch(`/guest/kuliner/${currentKulinerId}/review`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -516,13 +603,140 @@
             })
             .catch(err => console.error(err));
         }
-        @endauth
+
+        function renderReviews(reviews) {
+            const container = document.getElementById('reviewList');
+            document.getElementById('reviewCount').textContent = reviews.length;
+
+            if (reviews.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">Belum ada ulasan.</p>';
+                return;
+            }
+
+            container.innerHTML = reviews.map(r => `
+                <div class="flex space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 font-bold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <div class="flex justify-between items-start mb-1">
+                                <h4 class="text-sm font-bold text-gray-900">Anonymous</h4>
+                                <span class="text-xs text-gray-500">${new Date(r.created_at).toLocaleDateString('id-ID')}</span>
+                            </div>
+                            <p class="text-sm text-gray-700">${r.ulasan}</p>
+                        </div>
+                        <div class="flex items-center mt-1 text-xs text-gray-500">
+                            <button onclick="toggleReviewLike(${r.id})" class="flex items-center hover:text-orange-500 transition">
+                                <svg class="w-4 h-4 mr-1 ${r.is_liked ? 'text-orange-500 fill-current' : ''}" id="likeIcon-${r.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                                </svg>
+                                <span id="likeCount-${r.id}">${r.likes_count}</span> Suka
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleReviewLike(reviewId) {
+            fetch(`/guest/review/${reviewId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const icon = document.getElementById(`likeIcon-${reviewId}`);
+                const count = document.getElementById(`likeCount-${reviewId}`);
+
+                count.textContent = data.likes_count;
+                if (data.status === 'added') {
+                    icon.classList.add('text-orange-500', 'fill-current');
+                } else {
+                    icon.classList.remove('text-orange-500', 'fill-current');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function closeModal(event) {
+            if (event.target.id === 'detailModal') {
+                closeDetailModal();
+            }
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            currentKulinerId = null;
+        }
+
+        // Escape key to close modal
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeDetailModal();
+                closeFeedbackModal();
+            }
+        });
+
+        // Feedback Logic
+        function openFeedbackModal() {
+            const modal = document.getElementById('feedbackModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeFeedbackModal(event) {
+            if (event && event.target.id !== 'feedbackModal' && !event.target.innerText) return;
+            const modal = document.getElementById('feedbackModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function submitFeedback(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch('/guest/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    alert('Terima kasih! Masukan Anda telah terkirim.');
+                    form.reset();
+                    closeFeedbackModal();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Gagal mengirim masukan.');
+            });
+        }
     </script>
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8 mt-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p class="text-gray-400">&copy; {{ date('Y') }} SIRETA - Sistem Informasi Kuliner Kalimantan Timur</p>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400">&copy; {{ date('Y') }} SIRETA - Sistem Informasi Kuliner Kalimantan Timur</p>
+                <a href="{{ route('login') }}" class="text-gray-500 hover:text-gray-300 text-sm mt-2 md:mt-0">Admin</a>
+            </div>
         </div>
     </footer>
 </body>

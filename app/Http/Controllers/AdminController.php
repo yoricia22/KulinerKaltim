@@ -3,46 +3,31 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Kuliner;
+use App\Models\Review;
+use App\Models\Rating;
 
 class AdminController extends Controller
 {
-     public function dashboard()
+    public function dashboard()
     {
         $totalKuliner = Kuliner::count();
-        $totalUsers = User::where('role', 'user')->count();
-        // $totalReviews = Review::count(); // Uncomment jika sudah ada
-        // $avgRating = Review::avg('rating'); // Uncomment jika sudah ada
-        $totalReviews = 0; // Sementara
-        $avgRating = 0; // Sementara
+        $totalReviews = Review::where('is_hidden', false)->count();
+        $avgRating = Rating::avg('rating') ?? 0;
 
         $recentKuliner = Kuliner::latest()->take(5)->get();
-        $recentUsers = User::where('role', 'user')->latest()->take(5)->get();
+        $recentReviews = Review::with('kuliner')
+            ->where('is_hidden', false)
+            ->latest()
+            ->take(5)
+            ->get();
 
         return view('dashboardadmin', compact(
             'totalKuliner',
-            'totalUsers',
             'totalReviews',
             'avgRating',
             'recentKuliner',
-            'recentUsers'
+            'recentReviews'
         ));
-    }
-
-    public function manageUsers()
-    {
-        $users = User::where('role', 'user')->get();
-        return view('manageuser', compact('users'));
-    }
-
-    public function toggleBan(User $user)
-    {
-        // Toggle status between 'active' and 'banned'
-        $user->status = $user->status === 'banned' ? 'active' : 'banned';
-        $user->save();
-
-        $statusMessage = $user->status === 'banned' ? 'banned' : 'unbanned';
-        return redirect()->back()->with('success', "User has been {$statusMessage} successfully.");
     }
 }

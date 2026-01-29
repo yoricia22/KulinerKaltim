@@ -165,12 +165,27 @@ class KulinerController extends Controller
                 Storage::disk('public')->delete($kuliner->gambar);
             }
 
+            // Detach categories first (many-to-many)
+            $kuliner->categories()->detach();
+
+            // Delete related ratings
+            $kuliner->ratings()->delete();
+
+            // Delete related review likes first, then reviews
+            foreach ($kuliner->reviews as $review) {
+                $review->likes()->delete();
+            }
+            $kuliner->reviews()->delete();
+
+            // Delete related favorites
+            $kuliner->favorites()->delete();
+
             // Delete the kuliner
             $kuliner->delete();
 
             return redirect()->route('admin.kuliner.manage')->with('success', 'Kuliner berhasil dihapus!');
         } catch (\Exception $e) {
-            return redirect()->route('admin.kuliner.manage')->with('error', 'Gagal menghapus kuliner!');
+            return redirect()->route('admin.kuliner.manage')->with('error', 'Gagal menghapus kuliner: ' . $e->getMessage());
         }
     }
 
