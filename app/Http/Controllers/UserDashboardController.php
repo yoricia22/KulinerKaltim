@@ -233,6 +233,12 @@ class UserDashboardController extends Controller
             'ulasan' => $request->ulasan,
         ]);
 
+        ActivityLog::create([
+            'user_id' => $this->anonymousUserId(),
+            'action' => 'review_kuliner',
+            'description' => "Reviewed: {$kuliner->nama_kuliner} (Guest)"
+        ]);
+
         return response()->json([
             'status' => 'success',
             'review' => [

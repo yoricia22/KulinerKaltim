@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Kuliner;
 use App\Models\Review;
 use App\Models\Rating;
+use App\Models\ActivityLog;
 
 class AdminController extends Controller
 {
@@ -29,5 +30,16 @@ class AdminController extends Controller
             'recentKuliner',
             'recentReviews'
         ));
+    }
+
+    public function activityLogs()
+    {
+        $logs = ActivityLog::with('user')->latest()->paginate(20);
+        return view('admin.activity_logs', compact('logs'));
+    }
+
+    public function guidelines()
+    {
+        return view('admin.guidelines');
     }
 }

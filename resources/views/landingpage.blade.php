@@ -144,7 +144,7 @@
 
                             <!-- Vegetarian Badge -->
                             @if ($kuliner->is_vegetarian)
-                                <span class="absolute top-10 right-2 bg-green-400 text-white text-xs px-2 py-1 rounded-full font-semibold shadow">Veggie</span>
+                                <span class="absolute top-10 right-2 bg-green-400 text-white text-xs px-2 py-1 rounded-full font-semibold shadow">Vegetarian</span>
                             @endif
 
                             <!-- Rating Badge -->

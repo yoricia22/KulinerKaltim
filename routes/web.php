@@ -5,6 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\KulinerController;
 use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\GuidelinesController;
 use App\Http\Controllers\AdminFeedbackController;
 use App\Http\Controllers\AdminReviewController;
 use App\Http\Middleware\CheckStatus;
@@ -46,18 +49,20 @@ Route::middleware(['auth', 'role:admin', CheckStatus::class])->group(function ()
     Route::get('/admin/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
     Route::delete('/admin/reviews/{id}', [AdminReviewController::class, 'destroy'])->name('admin.reviews.destroy');
 
+    // User Management
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::post('/admin/users/{user}/toggle-ban', [AdminUserController::class, 'toggleBan'])->name('admin.users.toggle-ban');
+    Route::get('/admin/users/{user}/logs', [AdminUserController::class, 'logs'])->name('admin.users.logs');
+
     // Feedback Management
     Route::get('/admin/feedback', [AdminFeedbackController::class, 'index'])->name('admin.feedback.index');
     Route::get('/admin/feedback/{id}', [AdminFeedbackController::class, 'show'])->name('admin.feedback.show');
     Route::post('/admin/feedback/{id}/read', [AdminFeedbackController::class, 'markAsRead'])->name('admin.feedback.read');
     Route::delete('/admin/feedback/{id}', [AdminFeedbackController::class, 'destroy'])->name('admin.feedback.destroy');
 
-    // Placeholder routes (coming soon features)
-    Route::get('/admin/activity-logs', function () {
-        return view('dashboardadmin');
-    })->name('admin.activity-logs');
+    // Activity Logs
+    Route::get('/admin/activity-logs', [ActivityLogController::class, 'index'])->name('admin.activity-logs');
 
-    Route::get('/admin/settings', function () {
-        return view('dashboardadmin');
-    })->name('admin.settings');
+    // Guidelines
+    Route::get('/admin/guidelines', [GuidelinesController::class, 'index'])->name('admin.guidelines');
 });

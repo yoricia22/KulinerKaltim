@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kuliner;
 use App\Models\Place;
 use App\Models\Category;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -56,6 +57,13 @@ class KulinerController extends Controller
         if ($request->has('categories')) {
             $kuliner->categories()->attach($request->categories);
         }
+
+        // Log activity
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'created',
+            'description' => "Admin created kuliner: {$kuliner->nama_kuliner}"
+        ]);
 
         return redirect()->route('admin.kuliner.manage')->with('success', 'Kuliner berhasil ditambahkan!');
     }
@@ -142,6 +150,13 @@ class KulinerController extends Controller
             $kuliner->categories()->sync($request->categories);
         }
 
+        // Log activity
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'updated',
+            'description' => "Admin updated kuliner: {$kuliner->nama_kuliner}"
+        ]);
+
         return redirect()->route('admin.kuliner.manage')->with('success', 'Kuliner berhasil diperbarui!');
     }
 
@@ -182,6 +197,12 @@ class KulinerController extends Controller
 
             // Delete the kuliner
             $kuliner->delete();
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'delete_kuliner',
+                'description' => "Deleted kuliner: {$kuliner->nama_kuliner}"
+            ]);
 
             return redirect()->route('admin.kuliner.manage')->with('success', 'Kuliner berhasil dihapus!');
         } catch (\Exception $e) {
