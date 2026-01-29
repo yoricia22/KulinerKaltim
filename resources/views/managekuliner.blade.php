@@ -427,8 +427,9 @@
             const nameElement = document.getElementById('deleteKulinerName');
 
             nameElement.textContent = name;
-            // URL dengan prefix yang benar
-            form.action = `${baseUrl}/kuliner/${id}/delete`;
+            nameElement.textContent = name;
+            // URL dengan prefix yang benar (/admin/kuliner) sesuai definisi route
+            form.action = `/admin/kuliner/${id}/delete`;
 
             console.log('Delete form action:', form.action);
 
