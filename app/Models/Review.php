@@ -4,6 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $kuliner_id
+ * @property string $ulasan
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ReviewLike[] $likes
+ * @mixin \Eloquent
+ */
 class Review extends Model
 {
     protected $fillable = ['user_id', 'kuliner_id', 'ulasan', 'is_hidden', 'report_reason'];
@@ -25,6 +34,6 @@ class Review extends Model
 
     public function isLikedBy(User $user)
     {
-        return $this->likes()->where('user_id', $user->id)->exists();
+        return $this->likes()->where('user_id', $user->getKey())->exists();
     }
 }

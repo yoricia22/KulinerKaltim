@@ -4,6 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $nama_kuliner
+ * @property string|null $deskripsi
+ * @property string|null $asal_daerah
+ * @property string|null $gambar
+ * @property string|null $external_image_url
+ * @property-read float $average_rating
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Category[] $categories
+ * @mixin \Eloquent
+ */
 class Kuliner extends Model
 {
     protected $table = 'kuliner';

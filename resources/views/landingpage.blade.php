@@ -324,44 +324,70 @@
     </button>
 
     <!-- Feedback Modal -->
-    <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4" onclick="closeFeedbackModal(event)">
-        <div class="bg-white rounded-xl max-w-md w-full p-6 transform transition-all scale-100" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-900">Kirim Masukan</h3>
-                <button onclick="closeFeedbackModal()" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+    <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-opacity duration-300" onclick="closeFeedbackModal(event)">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all scale-95 opacity-0 duration-300 ease-out" id="feedbackModalContent" onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-orange-500 to-red-500 p-5 rounded-t-2xl relative overflow-hidden">
+                <!-- Decorative Circle -->
+                <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full"></div>
+                <div class="absolute bottom-0 left-0 -mb-4 -ml-4 w-16 h-16 bg-white opacity-10 rounded-full"></div>
+                
+                <div class="flex justify-between items-center relative z-10">
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Kirim Masukan</h3>
+                        <p class="text-orange-100 text-xs mt-1">Bantu kami menjadi lebih baik</p>
+                    </div>
+                    <button onclick="closeFeedbackModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1.5 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
             </div>
             
-            <form id="feedbackForm" onsubmit="submitFeedback(event)">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                        <select name="category" required class="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500">
-                            <option value="General">Umum</option>
-                            <option value="Bug">Laporan Bug</option>
-                            <option value="Feature Request">Request Fitur</option>
-                            <option value="Content">Masalah Konten</option>
+            <form id="feedbackForm" onsubmit="submitFeedback(event)" class="p-5 space-y-4">
+                <!-- Category -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Kategori Masukan</label>
+                    <div class="relative">
+                        <select name="category" required class="w-full pl-3 pr-8 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent block transition duration-200 hover:bg-white appearance-none">
+                            <option value="General">👋 Umum</option>
+                            <option value="Bug">🐛 Laporan Bug</option>
+                            <option value="Feature Request">✨ Request Fitur</option>
+                            <option value="Content">📝 Masalah Konten</option>
                         </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Subjek (Opsional)</label>
-                        <input type="text" name="subject" class="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500" placeholder="Ringkasan masukan...">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Pesan</label>
-                        <textarea name="message" rows="4" required class="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500" placeholder="Tulis masukan Anda disini..."></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama (Opsional)</label>
-                        <input type="text" name="sender_name" class="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500" placeholder="Anonymous">
-                    </div>
-
-                    <button type="submit" class="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition font-medium">Kirim Masukan</button>
                 </div>
+                
+                <!-- Subject -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Subjek <span class="text-gray-400 font-normal">(Opsional)</span></label>
+                    <input type="text" name="subject" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent block transition duration-200 hover:bg-white placeholder-gray-400" placeholder="Contoh: Tampilan di HP kurang rapi">
+                </div>
+
+                <!-- Message -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Pesan Anda</label>
+                    <textarea name="message" rows="3" required class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent block transition duration-200 hover:bg-white placeholder-gray-400 resize-none" placeholder="Ceritakan detail masukan atau pengalaman Anda..."></textarea>
+                </div>
+
+                <!-- Name -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Nama <span class="text-gray-400 font-normal">(Opsional)</span></label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        </div>
+                        <input type="text" name="sender_name" class="w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent block transition duration-200 hover:bg-white placeholder-gray-400" placeholder="Nama Anda (atau biarkan kosong untuk anonim)">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full text-white bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 focus:ring-4 focus:ring-orange-300 font-bold rounded-xl text-sm px-5 py-3 text-center shadow-lg shadow-orange-500/30 transform hover:-translate-y-0.5 transition duration-200 flex justify-center items-center group">
+                    <span>Kirim Masukan</span>
+                    <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
             </form>
         </div>
     </div>
@@ -690,15 +716,34 @@
         // Feedback Logic
         function openFeedbackModal() {
             const modal = document.getElementById('feedbackModal');
+            const content = document.getElementById('feedbackModalContent');
+            
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            
+            // Trigger reflow
+            void modal.offsetWidth;
+            
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
         }
 
         function closeFeedbackModal(event) {
-            if (event && event.target.id !== 'feedbackModal' && !event.target.innerText) return;
+            // If called via event (click on backdrop), check target
+            if (event && event.target.id !== 'feedbackModal') return;
+            
             const modal = document.getElementById('feedbackModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            const content = document.getElementById('feedbackModalContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
         }
 
         function submitFeedback(e) {

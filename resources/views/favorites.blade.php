@@ -21,6 +21,20 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
+        /* Card enhancements */
+        .kuliner-card { transition: transform .28s cubic-bezier(.2,.8,.2,1), box-shadow .28s; }
+        .kuliner-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12); }
+
+        /* Image overlay for better contrast */
+        .img-overlay { background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.35) 100%); }
+
+        /* Modal backdrop blur for focus */
+        #detailModal.bg-blur { backdrop-filter: blur(6px); }
+
+        /* Small badge polish */
+        .fav-badge { transition: transform .18s ease, opacity .18s ease; }
+        .fav-badge:hover { transform: scale(1.03); }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -53,7 +67,7 @@
     </nav>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="mb-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+        <div class="mb-6 flex flex-col items-center text-center">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Favorit Saya</h2>
                 <p class="text-gray-600">Koleksi kuliner favorit yang telah kamu simpan.</p>
@@ -67,11 +81,11 @@
                 <div class="flex-1">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="Cari kuliner atau asal daerah..."
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        class="w-full px-4 py-2 rounded-lg border border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
                 <div class="w-full md:w-1/4">
                     <select name="category"
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        class="w-full px-4 py-2 rounded-lg border border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
                         onchange="this.form.submit()">
                         <option value="">Semua Kategori</option>
                         @foreach ($categories as $category)
@@ -83,10 +97,10 @@
                     </select>
                 </div>
                 <button type="submit"
-                    class="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">Cari</button>
+                    class="px-6 py-2 bg-orange-300 text-white rounded-lg hover:bg-gray-700 transition">Cari</button>
                 @if (request('search') || request('category'))
                     <a href="{{ route('guest.favorites') }}"
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">Reset</a>
+                        class="px-4 py-2 bg-orange-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">Reset</a>
                 @endif
             </form>
         </div>
@@ -94,27 +108,23 @@
         <!-- Kuliner Cards Grid -->
         <div id="favoritesGrid">
             @if ($kuliners->isEmpty())
-                <div class="bg-white rounded-lg shadow-md p-8 text-center">
-                    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
-                        </path>
-                    </svg>
-                    <p class="text-xl text-gray-600 font-medium mb-2">Belum ada favorit.</p>
-                    <p class="text-sm text-gray-500">Mulai menambahkan kuliner favorit dari halaman beranda!</p>
-                    <a href="{{ route('landing') }}"
-                        class="inline-block mt-4 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
+                <div class="bg-white rounded-2xl shadow-xl p-12 text-center">
+                    <img src="https://img.icons8.com/ios-filled/100/FFA500/like--v1.png" class="mx-auto mb-4" alt="no favorites">
+                    <h3 class="text-2xl text-gray-800 font-semibold mb-2">Belum ada favorit</h3>
+                    <p class="text-gray-500 mb-6">Kamu belum menyimpan kuliner favorit. Temukan makanan lezat dan simpan favoritmu.</p>
+                    <a href="{{ route('landing') }}" class="inline-flex items-center gap-2 mt-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full shadow-lg hover:scale-105 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3"></path></svg>
                         Jelajahi Kuliner
                     </a>
                 </div>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     @foreach ($kuliners as $kuliner)
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 flex flex-col h-full cursor-pointer kuliner-card"
+                        <div class="bg-white rounded-lg overflow-hidden transition duration-300 flex flex-col h-full cursor-pointer kuliner-card border border-transparent hover:border-gray-100"
                             data-id="{{ $kuliner->id }}"
                             onclick="openKulinerModal({{ $kuliner->id }})">
                             <!-- Image -->
-                            <div class="relative h-48 bg-gray-200">
+                            <div class="relative h-48 bg-gray-200 group">
                                 @php
                                     $imgSrc = 'https://via.placeholder.com/640x360?text=No+Image';
                                     if ($kuliner->external_image_url) {
@@ -124,25 +134,21 @@
                                     }
                                 @endphp
                                 <img src="{{ $imgSrc }}" alt="{{ $kuliner->nama_kuliner }}"
-                                    class="w-full h-full object-cover"
-                                    onerror="this.onerror=null;this.src='https://via.placeholder.com/640x360?text=No+Image';">
+                                    class="w-full h-full object-cover">
+
+                                <div class="absolute inset-0 img-overlay pointer-events-none"></div>
 
                                 <!-- Favorite Badge -->
-                                <div class="absolute top-2 left-2 bg-red-500 bg-opacity-95 px-2 py-1 rounded-lg shadow-sm flex items-center">
-                                    <svg class="w-4 h-4 text-white mr-1 fill-current" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
-                                        </path>
+                                <div class="absolute top-3 left-3 fav-badge bg-white bg-opacity-95 px-2 py-1 rounded-full shadow-sm flex items-center">
+                                    <svg class="w-4 h-4 text-red-500 mr-1 fill-current" viewBox="0 0 24 24">
+                                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                                     </svg>
-                                    <span class="text-xs font-semibold text-white">Favorit</span>
                                 </div>
 
                                 <!-- Rating Badge -->
-                                <div class="absolute top-2 right-2 bg-white bg-opacity-90 px-2 py-1 rounded-lg shadow-sm flex items-center">
-                                    <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                    </svg>
-                                    <span class="text-sm font-bold text-gray-800">{{ number_format($kuliner->average_rating, 1) }}</span>
+                                <div class="absolute top-3 right-3 bg-white px-2 py-1 rounded-full shadow flex items-center text-sm font-semibold">
+                                    <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                    <span>{{ number_format($kuliner->average_rating, 1) }}</span>
                                 </div>
                             </div>
 
@@ -173,8 +179,8 @@
     </main>
 
     <!-- Detail Modal -->
-    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4" onclick="closeModal(event)">
-        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-40 bg-blur hidden items-center justify-center z-50 p-4" onclick="closeModal(event)">
+        <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-xl" onclick="event.stopPropagation()">
             <!-- Loading State -->
             <div id="modalLoading" class="flex items-center justify-center py-20">
                 <svg class="animate-spin h-10 w-10 text-orange-500" fill="none" viewBox="0 0 24 24">

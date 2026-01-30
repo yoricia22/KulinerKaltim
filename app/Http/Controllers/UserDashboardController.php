@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Rating;
 use App\Models\Review;
 use App\Models\ReviewLike;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -28,7 +29,7 @@ class UserDashboardController extends Controller
                 'status' => 'active',
             ]);
         }
-        return $user->id;
+        return $user->getKey();
     }
 
     /**
@@ -127,12 +128,13 @@ class UserDashboardController extends Controller
         try {
             $kuliner = Kuliner::with(['categories', 'place', 'ratings'])->findOrFail($id);
 
+            /** @var \App\Models\Kuliner $kuliner */
             $sessionFavorites = session()->get('favorites', []);
-            $isFavorited = in_array($kuliner->id, $sessionFavorites, true);
+            $isFavorited = in_array($kuliner->getKey(), $sessionFavorites, true);
 
             // Get session-based rating if exists
             $sessionRatings = session()->get('ratings', []);
-            $userRating = $sessionRatings[$kuliner->id] ?? 0;
+            $userRating = $sessionRatings[$kuliner->getKey()] ?? 0;
 
             // Get session likes
             $sessionLikes = session()->get('review_likes', []);
@@ -142,16 +144,16 @@ class UserDashboardController extends Controller
                 ->where('is_hidden', false)
                 ->latest()
                 ->get()
-                ->map(function ($review) use ($sessionLikes) {
+                ->map(function (Review $review) use ($sessionLikes) {
                     return [
-                        'id' => $review->id,
+                        'id' => $review->getKey(),
                         'ulasan' => $review->ulasan,
                         'created_at' => $review->created_at,
                         'user' => [
                             'id' => 0,
                             'name' => 'Anonymous',
                         ],
-                        'is_liked' => in_array($review->id, $sessionLikes, true),
+                        'is_liked' => in_array($review->getKey(), $sessionLikes, true),
                         'likes_count' => $review->likes()->count(),
                     ];
                 });
@@ -175,12 +177,13 @@ class UserDashboardController extends Controller
     public function guestToggleFavorite(Kuliner $kuliner)
     {
         $favorites = session()->get('favorites', []);
-        if (in_array($kuliner->id, $favorites, true)) {
-            $favorites = array_values(array_filter($favorites, fn($id) => $id !== $kuliner->id));
+        $kulinerId = $kuliner->getKey();
+        if (in_array($kulinerId, $favorites, true)) {
+            $favorites = array_values(array_filter($favorites, fn($id) => $id !== $kulinerId));
             session()->put('favorites', $favorites);
             return response()->json(['status' => 'removed']);
         } else {
-            $favorites[] = $kuliner->id;
+            $favorites[] = $kulinerId;
             session()->put('favorites', $favorites);
             return response()->json(['status' => 'added']);
         }
@@ -198,14 +201,15 @@ class UserDashboardController extends Controller
         $anonId = $this->anonymousUserId();
         
         // Store rating in database under anonymous user
+        $kulinerId = $kuliner->getKey();
         $rating = Rating::updateOrCreate(
-            ['user_id' => $anonId, 'kuliner_id' => $kuliner->id],
+            ['user_id' => $anonId, 'kuliner_id' => $kulinerId],
             ['rating' => $request->rating]
         );
 
         // Also store in session so user can see their rating
         $sessionRatings = session()->get('ratings', []);
-        $sessionRatings[$kuliner->id] = $request->rating;
+        $sessionRatings[$kulinerId] = $request->rating;
         session()->put('ratings', $sessionRatings);
 
         // Recalculate average
@@ -214,7 +218,7 @@ class UserDashboardController extends Controller
         return response()->json([
             'status' => 'success',
             'rating' => $request->rating,
-            'average_rating' => $kuliner->average_rating
+                    'average_rating' => $kuliner->average_rating
         ]);
     }
 
@@ -227,22 +231,23 @@ class UserDashboardController extends Controller
             'ulasan' => 'required|string|max:1000',
         ]);
 
+        $kulinerId = $kuliner->getKey();
         $review = Review::create([
             'user_id' => $this->anonymousUserId(),
-            'kuliner_id' => $kuliner->id,
+            'kuliner_id' => $kulinerId,
             'ulasan' => $request->ulasan,
         ]);
 
         ActivityLog::create([
             'user_id' => $this->anonymousUserId(),
             'action' => 'review_kuliner',
-            'description' => "Reviewed: {$kuliner->nama_kuliner} (Guest)"
+            'description' => 'Reviewed: ' . $kuliner->getAttribute('nama_kuliner') . ' (Guest)'
         ]);
 
         return response()->json([
             'status' => 'success',
             'review' => [
-                'id' => $review->id,
+                'id' => $review->getKey(),
                 'ulasan' => $review->ulasan,
                 'created_at' => $review->created_at,
                 'user' => [
@@ -262,26 +267,27 @@ class UserDashboardController extends Controller
     {
         $sessionLikes = session()->get('review_likes', []);
         
-        if (in_array($review->id, $sessionLikes, true)) {
+        $reviewId = $review->getKey();
+        if (in_array($reviewId, $sessionLikes, true)) {
             // Unlike - remove from session
-            $sessionLikes = array_values(array_filter($sessionLikes, fn($id) => $id !== $review->id));
+            $sessionLikes = array_values(array_filter($sessionLikes, fn($id) => $id !== $reviewId));
             session()->put('review_likes', $sessionLikes);
             
             // Also remove from database if exists
             $anonId = $this->anonymousUserId();
-            ReviewLike::where('user_id', $anonId)->where('review_id', $review->id)->delete();
+            ReviewLike::where('user_id', $anonId)->where('review_id', $reviewId)->delete();
             
             return response()->json(['status' => 'removed', 'likes_count' => $review->likes()->count()]);
         } else {
             // Like - add to session
-            $sessionLikes[] = $review->id;
+            $sessionLikes[] = $reviewId;
             session()->put('review_likes', $sessionLikes);
             
             // Also add to database
             $anonId = $this->anonymousUserId();
             ReviewLike::firstOrCreate([
                 'user_id' => $anonId,
-                'review_id' => $review->id
+                'review_id' => $reviewId
             ]);
             
             return response()->json(['status' => 'added', 'likes_count' => $review->likes()->count()]);
