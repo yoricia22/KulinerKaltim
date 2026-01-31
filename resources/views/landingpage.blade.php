@@ -120,7 +120,7 @@
                             <option value="non-halal" {{ request('status') == 'non-halal' ? 'selected' : '' }}>Non-Halal</option>
                             <option value="vegetarian" {{ request('status') == 'vegetarian' ? 'selected' : '' }}>Vegetarian</option>
                         </select>
-                        <button type="submit" class="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-8 py-4 rounded-xl font-bold hover:from-gray-900 hover:to-black transition-all shadow-lg hover:shadow-xl btn-shine">
+                        <button type="submit" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-xl font-bold hover:from-orange-600 hover:to-red-600 transition-all shadow-lg hover:shadow-xl btn-shine">
                             Cari
                         </button>
                     </form>
