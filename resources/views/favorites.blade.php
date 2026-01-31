@@ -33,26 +33,26 @@
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
-    <nav class="bg-white shadow-md sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="{{ route('landing') }}" class="flex-shrink-0 flex items-center">
-                        <img class="h-10 w-auto" src="{{ asset('images/Sireta logo.png') }}" alt="Sireta Logo">
-                        <span class="ml-3 text-xl font-bold text-gray-800">SIRETA</span>
-                    </a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('landing') }}" class="text-gray-600 hover:text-orange-500 px-3 py-2 rounded-md text-sm font-medium flex items-center">
-                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
+    <!-- Navigation -->
+    <nav class="glass shadow-lg sticky top-0 z-50 border-b border-white/20">
+        <div class="px-6 lg:px-10 xl:px-16">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo - Left aligned with better spacing -->
+                <a href="{{ route('landing') }}" class="flex items-center space-x-2.5 group">
+                    <img class="h-9 w-auto transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" src="{{ asset('images/Sireta logo.png') }}" alt="Sireta Logo">
+                    <div class="flex flex-col leading-tight">
+                        <span class="text-xl font-extrabold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent tracking-tight">SIRETA</span>
+                        <span class="text-[10px] text-gray-400 font-medium tracking-wide hidden sm:block">Kuliner Kaltim</span>
+                    </div>
+                </a>
+
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('landing') }}" class="px-4 py-2 text-gray-600 hover:text-orange-600 font-medium transition flex items-center">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                         Beranda
                     </a>
-                    <a href="{{ route('guest.favorites') }}" class="text-orange-500 px-3 py-2 rounded-md text-sm font-medium flex items-center">
-                        <svg class="w-5 h-5 mr-1 fill-current" viewBox="0 0 24 24">
-                            <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                        </svg>
+                    <a href="{{ route('guest.favorites') }}" class="flex items-center px-4 py-2 rounded-full bg-orange-100 text-orange-600 font-medium transition-all duration-300">
+                        <svg class="w-5 h-5 mr-2 fill-current" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                         Favorit
                     </a>
                 </div>
@@ -93,7 +93,7 @@
                     </select>
                 </div>
                 <button type="submit"
-                    class="px-6 py-2 bg-orange-300 text-white rounded-lg hover:bg-gray-700 transition">Cari</button>
+                    class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-2 rounded-xl font-bold hover:from-orange-600 hover:to-red-600 transition-all shadow-lg hover:shadow-xl btn-shine">Cari</button>
                 @if (request('search') || request('category'))
                     <a href="{{ route('guest.favorites') }}"
                         class="px-4 py-2 bg-orange-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">Reset</a>

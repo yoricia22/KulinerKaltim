@@ -77,7 +77,7 @@
                 </select>
             </div>
             <button type="submit"
-                class="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">Cari</button>
+                class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-2 rounded-lg font-bold hover:from-orange-600 hover:to-red-600 transition-all shadow-md hover:shadow-lg">Cari</button>
             @if (request('search') || request('category'))
                 <a href="{{ route('admin.kuliner.manage') }}"
                     class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">Reset</a>
