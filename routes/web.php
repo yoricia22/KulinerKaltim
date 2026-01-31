@@ -1,11 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-<<<<<<< HEAD
-
-Route::get('/', function () {
-    return view('welcome');
-=======
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\KulinerController;
@@ -70,5 +65,4 @@ Route::middleware(['auth', 'role:admin', CheckStatus::class])->group(function ()
 
     // Guidelines
     Route::get('/admin/guidelines', [GuidelinesController::class, 'index'])->name('admin.guidelines');
->>>>>>> master
 });
