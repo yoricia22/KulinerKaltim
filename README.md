@@ -15,6 +15,8 @@ Proyek ini dibangun menggunakan framework **Laravel** dengan **Tailwind CSS** un
 
 ![ini adalah gambar yang menjelaskan alur proses login admin ke dalam dashboard admin](./public/images/Whatsapp%20Image%202026-01-18%20at%2019.56.06.jpeg)
 
+---
+
 ## Tentang Informasi Tambahan
 
 Nama Guru: Hendra Yuni Irawan, S.T., M.Kom
@@ -274,6 +276,14 @@ Jika ada pertanyaan atau saran, silakan hubungi:
 - **Asnia**: ameliaasnia@gmail.com
 - **Diva**: divasilviana30@gmail.com
 - **Nabila** nabilahcahya066@gmail.com
+
+---
+## tambahan informasi mengenai projek ini
+
+## Informasi Tambahan
+Untuk dokumentasi lengkap dan informasi detail proyek, silakan kunjungi:
+
+[![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white)](https://www.notion.so/Mini-Web-Project-2ee05347ba0f80139ddad6327fbb08c5)
 
 ---
 
