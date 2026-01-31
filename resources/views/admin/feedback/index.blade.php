@@ -22,7 +22,7 @@
 
     <!-- Tabs -->
     <div class="flex space-x-1 rounded-xl bg-gray-200 p-1 mb-6 w-fit">
-        <button onclick="switchTab('unread')" id="tab-unread" class="w-32 py-2.5 text-sm font-medium leading-5 rounded-lg text-orange-700 bg-white shadow focus:outline-none focus:ring-2 ring-offset-2 ring-offset-orange-400 ring-white ring-opacity-60 transition">
+        <button onclick="switchTab('unread')" id="tab-unread" class="w-32 py-2.5 text-sm font-bold leading-5 rounded-lg text-orange-700 bg-white shadow-md focus:outline-none focus:ring-2 ring-offset-2 ring-offset-orange-400 ring-white ring-opacity-60 transition-all duration-200">
             Unread
             @if($unreadFeedbacks->count() > 0)
                 <span class="ml-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $unreadFeedbacks->count() }}</span>
@@ -34,27 +34,29 @@
     </div>
 
     <!-- Unread Section -->
-    <div id="unread-section" class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+    <div id="unread-section" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 border-t-4 border-t-orange-500 transition-all duration-300">
+        <div class="px-6 py-4 border-b border-gray-100 bg-white">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                <div class="p-2 bg-green-100 rounded-full mr-3">
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
                 Inbox (Unread)
             </h3>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-500">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <thead class="bg-gradient-to-r from-orange-50 to-white border-b border-orange-100">
                     <tr>
-                        <th class="px-6 py-3">Category/Subject</th>
-                        <th class="px-6 py-3">Sender</th>
-                        <th class="px-6 py-3">Message Preview</th>
-                        <th class="px-6 py-3">Received</th>
-                        <th class="px-6 py-3">Action</th>
+                        <th class="px-6 py-4 text-xs font-bold text-orange-600 uppercase tracking-wider">Category/Subject</th>
+                        <th class="px-6 py-4 text-xs font-bold text-orange-600 uppercase tracking-wider">Sender</th>
+                        <th class="px-6 py-4 text-xs font-bold text-orange-600 uppercase tracking-wider">Message Preview</th>
+                        <th class="px-6 py-4 text-xs font-bold text-orange-600 uppercase tracking-wider">Received</th>
+                        <th class="px-6 py-4 text-xs font-bold text-orange-600 uppercase tracking-wider">Action</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100">
                     @forelse ($unreadFeedbacks as $feedback)
-                        <tr class="bg-white border-b hover:bg-gray-50">
+                        <tr class="hover:bg-orange-50/50 transition-colors duration-200">
                             <td class="px-6 py-4">
                                 <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{ $feedback->category }}</span>
                                 <div class="font-medium text-gray-900 mt-1">{{ $feedback->subject ?? 'No Subject' }}</div>
@@ -85,26 +87,28 @@
     </div>
 
     <!-- Read Section -->
-    <div id="read-section" class="bg-white rounded-lg shadow overflow-hidden hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76"></path></svg>
+    <div id="read-section" class="bg-white rounded-2xl shadow-xl overflow-hidden hidden border border-gray-100 border-t-4 border-t-gray-400 transition-all duration-300">
+        <div class="px-6 py-4 border-b border-gray-100 bg-white">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                <div class="p-2 bg-gray-100 rounded-full mr-3">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76"></path></svg>
+                </div>
                 Read History
             </h3>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-500">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <thead class="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
                     <tr>
-                        <th class="px-6 py-3">Subject</th>
-                        <th class="px-6 py-3">Sender</th>
-                        <th class="px-6 py-3">Read At</th>
-                        <th class="px-6 py-3">Action</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Subject</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Sender</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Read At</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100">
                     @forelse ($readFeedbacks as $feedback)
-                        <tr class="bg-white border-b hover:bg-gray-50 bg-gray-50/50">
+                        <tr class="hover:bg-gray-50 transition-colors duration-200">
                             <td class="px-6 py-4 font-medium text-gray-900">
                                 {{ $feedback->subject ?? 'No Subject' }}
                                 <div class="text-xs text-gray-500 font-normal">{{ $feedback->category }}</div>

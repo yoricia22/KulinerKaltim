@@ -85,11 +85,19 @@ class UserDashboardController extends Controller
     }
 
     /**
-     * Favorites page - session-based
+     * Favorites page - accepts IDs from localStorage via request parameter
      */
     public function favorites(Request $request)
     {
-        $favoriteIds = session()->get('favorites', []);
+        // Get favorite IDs from request (sent from localStorage) or fallback to session
+        $idsParam = $request->input('ids');
+        if ($idsParam) {
+            // Parse comma-separated IDs from localStorage
+            $favoriteIds = array_map('intval', array_filter(explode(',', $idsParam)));
+        } else {
+            // Fallback to session
+            $favoriteIds = session()->get('favorites', []);
+        }
         
         if (empty($favoriteIds)) {
             $kuliners = collect([]);

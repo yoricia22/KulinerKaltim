@@ -16,25 +16,25 @@
     </div>
 
     <!-- Activity Logs Table -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 border-t-4 border-t-orange-500">
         <div class="overflow-x-auto">
             @if($logs->count() > 0)
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gray-100 border-b">
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Waktu</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Admin</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Aksi</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Deskripsi</th>
+                <table class="w-full text-left">
+                    <thead class="bg-gradient-to-r from-orange-50 to-white border-b border-orange-100">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-bold text-orange-600 uppercase tracking-wider">Waktu</th>
+                            <th class="px-6 py-4 text-xs font-bold text-orange-600 uppercase tracking-wider">Admin</th>
+                            <th class="px-6 py-4 text-xs font-bold text-orange-600 uppercase tracking-wider">Aksi</th>
+                            <th class="px-6 py-4 text-xs font-bold text-orange-600 uppercase tracking-wider">Deskripsi</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-gray-100">
                         @foreach($logs as $log)
-                            <tr class="border-b hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                                    <div>
-                                        <p class="font-medium">{{ $log->created_at->format('d M Y') }}</p>
-                                        <p class="text-gray-500 text-xs">{{ $log->created_at->format('H:i:s') }}</p>
+                            <tr class="hover:bg-orange-50/50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex flex-col">
+                                        <span class="font-medium text-gray-900 text-sm">{{ $log->created_at->format('d M Y') }}</span>
+                                        <span class="text-orange-500 text-xs mt-0.5">{{ $log->created_at->format('H:i:s') }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
@@ -80,7 +80,7 @@
                 </table>
 
                 <!-- Pagination -->
-                <div class="bg-white border-t px-6 py-4">
+                <div class="bg-gray-50/50 border-t border-gray-100 px-6 py-4">
                     {{ $logs->links('pagination::tailwind') }}
                 </div>
             @else

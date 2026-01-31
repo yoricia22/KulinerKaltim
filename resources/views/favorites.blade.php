@@ -9,32 +9,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; }
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .line-clamp-1 {
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
+        /* Glassmorphism */
+        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .glass-dark { background: rgba(0,0,0,0.3); backdrop-filter: blur(12px); }
+        
+        /* Gradient Backgrounds */
+        .gradient-card { background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.7) 100%); }
+        
+        /* Card Hover */
+        .card-hover { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .card-hover:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        .card-hover:hover .card-img { transform: scale(1.1); }
+        .card-img { transition: transform 0.5s ease; }
+        
+        /* Button Effects */
+        .btn-shine { position: relative; overflow: hidden; }
+        .btn-shine::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(transparent, rgba(255,255,255,0.3), transparent); transform: rotate(45deg) translateX(-100%); transition: 0.6s; }
+        .btn-shine:hover::after { transform: rotate(45deg) translateX(100%); }
 
-        /* Card enhancements */
-        .kuliner-card { transition: transform .28s cubic-bezier(.2,.8,.2,1), box-shadow .28s; }
-        .kuliner-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12); }
-
-        /* Image overlay for better contrast */
-        .img-overlay { background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.35) 100%); }
-
-        /* Modal backdrop blur for focus */
-        #detailModal.bg-blur { backdrop-filter: blur(6px); }
-
-        /* Small badge polish */
-        .fav-badge { transition: transform .18s ease, opacity .18s ease; }
-        .fav-badge:hover { transform: scale(1.03); }
+        /* Input Focus */
+        .input-glow:focus { box-shadow: 0 0 0 3px rgba(249,115,22,0.3); }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -77,7 +71,9 @@
         <!-- Search and Filter -->
         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
             <form action="{{ route('guest.favorites') }}" method="GET"
-                class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4">
+                class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4"
+                onsubmit="syncFavoritesToForm(this)">
+                <input type="hidden" name="ids" id="favIdsInput" value="{{ request('ids') }}">
                 <div class="flex-1">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="Cari kuliner atau asal daerah..."
@@ -118,57 +114,76 @@
                     </a>
                 </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     @foreach ($kuliners as $kuliner)
-                        <div class="bg-white rounded-lg overflow-hidden transition duration-300 flex flex-col h-full cursor-pointer kuliner-card border border-transparent hover:border-gray-100"
+                        <div class="bg-white rounded-2xl shadow-lg overflow-hidden card-hover cursor-pointer group kuliner-card" 
                             data-id="{{ $kuliner->id }}"
                             onclick="openKulinerModal({{ $kuliner->id }})">
                             <!-- Image -->
-                            <div class="relative h-48 bg-gray-200 group">
+                            <div class="relative h-52 overflow-hidden">
                                 @php
                                     $imgSrc = 'https://via.placeholder.com/640x360?text=No+Image';
-                                    if ($kuliner->external_image_url) {
-                                        $imgSrc = $kuliner->external_image_url;
-                                    } elseif ($kuliner->gambar) {
-                                        $imgSrc = asset('storage/' . $kuliner->gambar);
-                                    }
+                                    if ($kuliner->external_image_url) { $imgSrc = $kuliner->external_image_url; }
+                                    elseif ($kuliner->gambar) { $imgSrc = asset('storage/' . $kuliner->gambar); }
                                 @endphp
-                                <img src="{{ $imgSrc }}" alt="{{ $kuliner->nama_kuliner }}"
-                                    class="w-full h-full object-cover">
-
-                                <div class="absolute inset-0 img-overlay pointer-events-none"></div>
-
-                                <!-- Favorite Badge -->
-                                <div class="absolute top-3 left-3 fav-badge bg-white bg-opacity-95 px-2 py-1 rounded-full shadow-sm flex items-center">
-                                    <svg class="w-4 h-4 text-red-500 mr-1 fill-current" viewBox="0 0 24 24">
-                                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                    </svg>
+                                <img src="{{ $imgSrc }}" alt="{{ $kuliner->nama_kuliner }}" class="w-full h-full object-cover card-img" onerror="this.onerror=null;this.src='https://via.placeholder.com/640x360?text=No+Image';">
+                                <div class="absolute inset-0 gradient-card opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                
+                                <!-- Badges -->
+                                <div class="absolute top-3 right-3 flex flex-col gap-2">
+                                    @if ($kuliner->is_halal)
+                                        <span class="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg">✓ Halal</span>
+                                    @else
+                                        <span class="bg-gradient-to-r from-red-500 to-rose-500 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg">Non-Halal</span>
+                                    @endif
+                                    @if ($kuliner->is_vegetarian)
+                                        <span class="bg-gradient-to-r from-green-400 to-teal-400 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg">🌿 Vegetarian</span>
+                                    @endif
                                 </div>
 
-                                <!-- Rating Badge -->
-                                <div class="absolute top-3 right-3 bg-white px-2 py-1 rounded-full shadow flex items-center text-sm font-semibold">
+                                <!-- Rating -->
+                                <div class="absolute bottom-3 left-3 glass px-3 py-1.5 rounded-full flex items-center shadow-lg">
                                     <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                                    <span>{{ number_format($kuliner->average_rating, 1) }}</span>
+                                    <span class="text-sm font-bold text-gray-800">{{ number_format($kuliner->average_rating, 1) }}</span>
+                                </div>
+
+                                <!-- Favorite Indicator (Always visible on Favorites Page) -->
+                                <div class="absolute bottom-3 right-3 favorite-indicator" data-id="{{ $kuliner->id }}">
+                                    <span class="bg-red-500 text-white p-2 rounded-full shadow-lg inline-block">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                                    </span>
                                 </div>
                             </div>
 
-                            <div class="p-4 flex-1 flex flex-col">
-                                <div class="flex-1">
-                                    <h3 class="text-lg font-bold text-gray-800 line-clamp-1 mb-1">{{ $kuliner->nama_kuliner }}</h3>
-                                    <p class="text-sm text-orange-600 font-medium mb-2 flex items-center">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
-                                        {{ $kuliner->asal_daerah }}
-                                    </p>
-                                    <p class="text-gray-600 text-sm line-clamp-2 mb-3">{{ $kuliner->deskripsi }}</p>
+                            <div class="p-5">
+                                <h3 class="text-lg font-bold text-gray-800 line-clamp-1 mb-2 group-hover:text-orange-500 transition-colors">{{ $kuliner->nama_kuliner }}</h3>
+                                <p class="text-sm text-orange-600 font-semibold mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    {{ $kuliner->asal_daerah }}
+                                </p>
+                                <p class="text-gray-500 text-sm line-clamp-2 mb-4">{{ $kuliner->deskripsi }}</p>
 
-                                    <div class="flex flex-wrap gap-1">
-                                        @foreach ($kuliner->categories as $cat)
-                                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">{{ $cat->nama_kategori }}</span>
-                                        @endforeach
-                                    </div>
+                                <!-- Categories -->
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    @foreach ($kuliner->categories as $cat)
+                                        <span class="bg-orange-100 text-orange-700 text-xs px-3 py-1 rounded-full font-medium">{{ $cat->nama_kategori }}</span>
+                                    @endforeach
+                                </div>
+
+                                <!-- Place & Maps -->
+                                <div class="flex items-center justify-between">
+                                    @if ($kuliner->place)
+                                        <div class="flex items-center text-xs text-gray-500">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                            <span class="line-clamp-1">{{ $kuliner->place->nama_tempat }}</span>
+                                        </div>
+                                    @endif
+                                    @if ($kuliner->google_maps_url)
+                                        <a href="{{ $kuliner->google_maps_url }}" target="_blank" onclick="event.stopPropagation()" class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold rounded-full hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg">
+                                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                                            Maps
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -279,6 +294,26 @@
             localStorage.setItem('favorites', JSON.stringify(favorites));
         }
 
+        // On page load, sync localStorage favorites with URL if needed
+        (function() {
+            const favorites = getFavorites();
+            const urlParams = new URLSearchParams(window.location.search);
+            const idsInUrl = urlParams.get('ids');
+            
+            // If we have favorites in localStorage but no 'ids' param in URL, redirect with ids
+            if (favorites.length > 0 && !idsInUrl) {
+                urlParams.set('ids', favorites.join(','));
+                window.location.search = urlParams.toString();
+            }
+            // If localStorage is empty but URL has filters, let it show empty state
+        })();
+
+        // Sync localStorage favorites to form before submit
+        function syncFavoritesToForm(form) {
+            const favorites = getFavorites();
+            document.getElementById('favIdsInput').value = favorites.join(',');
+        }
+
         function openKulinerModal(id) {
             currentKulinerId = id;
             const modal = document.getElementById('detailModal');
@@ -380,6 +415,16 @@
                 const card = document.querySelector(`.kuliner-card[data-id="${currentKulinerId}"]`);
                 if (card) {
                     card.remove();
+                }
+                
+                // Check if favorites is now empty and refresh page to show empty state
+                if (favorites.length === 0) {
+                    saveFavorites(favorites);
+                    // Update URL to remove ids param
+                    const urlParams = new URLSearchParams(window.location.search);
+                    urlParams.delete('ids');
+                    window.location.search = urlParams.toString();
+                    return;
                 }
             } else {
                 favorites.push(currentKulinerId);
@@ -541,10 +586,92 @@
         });
     </script>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8 mt-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p class="text-gray-400">&copy; {{ date('Y') }} SIRETA - Sistem Informasi Kuliner Kalimantan Timur</p>
+<!-- Footer -->
+    <footer class="bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white pt-16 pb-8 mt-16 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <!-- Brand Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <img src="{{ asset('images/Sireta logo.png') }}" alt="Sireta" class="h-10 w-auto opacity-90">
+                        <span class="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">SIRETA</span>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Sistem Informasi Kuliner Kalimantan Timur. Melestarikan dan memperkenalkan kekayaan cita rasa kuliner tradisional Nusantara dari Timur Borneo.
+                    </p>
+                    <div class="flex space-x-4 pt-2">
+                        <a href="#" class="text-gray-400 hover:text-orange-500 transition"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg></a>
+                        <a href="#" class="text-gray-400 hover:text-orange-500 transition"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                    </div>
+                </div>
+
+                <!-- Explore Section -->
+                <div>
+                    <h4 class="text-white font-semibold mb-6 relative inline-block">
+                        Jelajahi Kuliner
+                        <span class="absolute bottom-0 left-0 w-1/2 h-1 bg-orange-500 rounded-full"></span>
+                    </h4>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="{{ route('guest.favorites') }}" class="hover:text-orange-400 transition flex items-center"><span class="mr-2">›</span> Semua Favorit</a></li>
+                        <li><a href="{{ route('guest.favorites', ['category' => 'Makanan Berat']) }}" class="hover:text-orange-400 transition flex items-center"><span class="mr-2">›</span> Makanan Berat</a></li>
+                        <li><a href="{{ route('guest.favorites', ['category' => 'Makanan Ringan']) }}" class="hover:text-orange-400 transition flex items-center"><span class="mr-2">›</span> Cemilan & Jajanan</a></li>
+                        <li><a href="{{ route('guest.favorites', ['category' => 'Minuman']) }}" class="hover:text-orange-400 transition flex items-center"><span class="mr-2">›</span> Minuman Khas</a></li>
+                    </ul>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-white font-semibold mb-6 relative inline-block">
+                        Tautan Cepat
+                        <span class="absolute bottom-0 left-0 w-1/2 h-1 bg-orange-500 rounded-full"></span>
+                    </h4>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="{{ route('landing') }}" class="hover:text-orange-400 transition">Beranda</a></li>
+                        <li><a href="#" onclick="openFeedbackModal(); return false;" class="hover:text-orange-400 transition">Beri Masukan</a></li>
+                        <li><a href="{{ route('login') }}" class="hover:text-orange-400 transition">Login Admin</a></li>
+                        @auth
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="hover:text-red-500 transition text-left">Logout</button>
+                                </form>
+                            </li>
+                        @endauth
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="text-white font-semibold mb-6 relative inline-block">
+                        Hubungi Kami
+                        <span class="absolute bottom-0 left-0 w-1/2 h-1 bg-orange-500 rounded-full"></span>
+                    </h4>
+                    <ul class="space-y-4 text-sm text-gray-400">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mr-3 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span>Jl. Aminah Syukur No.82, Samarinda, Kalimantan Timur</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <a href="mailto:info@sireta-kaltim.id" class="hover:text-white transition">info@sireta-kaltim.id</a>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                            <span>+62 0000 123456</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
+                <p>&copy; {{ date('Y') }} SIRETA. Dibuat dengan ❤️ untuk Kuliner Indonesia.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-white transition">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition">Terms of Service</a>
+                    <a href="#" class="hover:text-white transition">Sitemap</a>
+                </div>
+            </div>
         </div>
     </footer>
 </body>
