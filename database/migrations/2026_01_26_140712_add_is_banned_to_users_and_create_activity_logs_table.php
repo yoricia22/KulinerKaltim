@@ -11,9 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users_and_create_activity_logs', function (Blueprint $table) {
-            //
-        });
+        // Add is_banned column to users table if it doesn't exist
+        if (!Schema::hasColumn('users', 'is_banned')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->boolean('is_banned')->default(false)->after('password');
+            });
+        }
+
+        // Create activity_logs table if it doesn't exist
+        if (!Schema::hasTable('activity_logs')) {
+            Schema::create('activity_logs', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+                $table->string('action');
+                $table->text('description')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
@@ -21,8 +35,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users_and_create_activity_logs', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('activity_logs');
+        
+        if (Schema::hasColumn('users', 'is_banned')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('is_banned');
+            });
+        }
     }
 };
