@@ -48,7 +48,15 @@ class UserDashboardController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Kuliner::query()->with(['categories', 'place', 'ratings']);
+        $query = Kuliner::query()->with(['categories', 'place', 'ratings'])
+            ->where(function($q) {
+                $q->whereNotNull('gambar')
+                  ->where('gambar', '!=', '')
+                  ->orWhere(function($q2) {
+                      $q2->whereNotNull('external_image_url')
+                         ->where('external_image_url', '!=', '');
+                  });
+            });
 
         if ($request->filled('search')) {
             $search = $request->search;

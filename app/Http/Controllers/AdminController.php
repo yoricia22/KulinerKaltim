@@ -16,7 +16,17 @@ class AdminController extends Controller
         $totalReviews = Review::where('is_hidden', false)->count();
         $avgRating = Rating::avg('rating') ?? 0;
 
-        $recentKuliner = Kuliner::latest()->take(5)->get();
+        $recentKuliner = Kuliner::where(function($q) {
+                $q->whereNotNull('gambar')
+                  ->where('gambar', '!=', '')
+                  ->orWhere(function($q2) {
+                      $q2->whereNotNull('external_image_url')
+                         ->where('external_image_url', '!=', '');
+                  });
+            })
+            ->latest()
+            ->take(5)
+            ->get();
         $recentReviews = Review::with('kuliner')
             ->where('is_hidden', false)
             ->latest()

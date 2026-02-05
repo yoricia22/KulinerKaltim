@@ -70,7 +70,15 @@ class KulinerController extends Controller
 
     public function manage(Request $request)
     {
-        $query = Kuliner::query()->with(['categories', 'place']);
+        $query = Kuliner::query()->with(['categories', 'place'])
+            ->where(function($q) {
+                $q->whereNotNull('gambar')
+                  ->where('gambar', '!=', '')
+                  ->orWhere(function($q2) {
+                      $q2->whereNotNull('external_image_url')
+                         ->where('external_image_url', '!=', '');
+                  });
+            });
 
         if ($request->filled('search')) {
             $query->where('nama_kuliner', 'like', '%' . $request->search . '%')

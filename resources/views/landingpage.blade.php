@@ -53,7 +53,7 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo - Left aligned with better spacing -->
                 <a href="{{ route('landing') }}" class="flex items-center space-x-2.5 group">
-                    <img class="h-9 w-auto transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" src="{{ asset('images/Sireta logo.png') }}" alt="Sireta Logo">
+                    <img class="h-9 w-9 rounded-full object-cover transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" src="{{ asset('images/Sireta logo.png') }}" alt="Sireta Logo">
                     <div class="flex flex-col leading-tight">
                         <span class="text-xl font-extrabold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent tracking-tight">SIRETA</span>
                         <span class="text-[10px] text-gray-400 font-medium tracking-wide hidden sm:block">Kuliner Kaltim</span>
@@ -485,7 +485,7 @@
                 <!-- Brand Section -->
                 <div class="space-y-4">
                     <div class="flex items-center space-x-3">
-                        <img src="{{ asset('images/Sireta logo.png') }}" alt="Sireta" class="h-10 w-auto opacity-90">
+                        <img src="{{ asset('images/Sireta logo.png') }}" alt="Sireta" class="h-10 w-10 rounded-full object-cover opacity-90">
                         <span class="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">SIRETA</span>
                     </div>
                     <p class="text-gray-400 text-sm leading-relaxed">
